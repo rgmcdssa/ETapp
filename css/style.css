@@ -134,7 +134,7 @@ table {
 	margin-left: 2%; 
 }
 
-table, th, td {
+th, td {
 	padding: 5px;
 	border: 1px #999 solid; 
 }
@@ -145,6 +145,9 @@ th, td {
 
 tr:nth-child(even) {
 	background-color: #999; 
+}
+#plotArea {
+	overflow-y: scroll; s
 }
 
 /* Navigation */

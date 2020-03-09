@@ -4,10 +4,10 @@ function fftResults(signal) {
 	var fft = new p5.FFT();
 }
 
-class spiralPoint {
+class bullseyePoint {
 
 	constructor(xx,yy,tt) {
-		this.spiralPointColor="black";
+		this.bullseyePointColor="black";
 		this.pointSize=1;
 	
 		this.xpos=xx;
@@ -15,22 +15,34 @@ class spiralPoint {
 		this.time=tt;
 	
 		var offsetX = 0; var offsetY = 0;
-		if (currentSpiral == 0) { offsetX = originX; offsetY = originY; }
-		else if (currentSpiral == 2) { offsetX = originX; offsetY = originY*2; } 	
-		else if (userSpiral.length > 0) { offsetX = userSpiral[0].xpos; offsetY = userSpiral[0].ypos; }
+		if (currentbullseye == 0) { offsetX = originX; offsetY = originY; }
+		else if (currentbullseye == 2) { offsetX = originX; offsetY = originY*2; } 	
+		else if (userbullseye.length > 0) { offsetX = userbullseye[0].xpos; offsetY = userbullseye[0].ypos; }
 		else { offsetX = xx; offsetY = yy; }
 		this.r=Math.sqrt(Math.pow(xx-offsetX,2)+Math.pow(yy-offsetY,2));
 		this.phi=Math.atan2(yy-offsetY,xx-offsetX);
 	}
 	
-	drawSpiralPoint(start) {	
-		var cv=document.getElementById("spiralCanvas");
+	drawbullseyePoint(start) {	
+		
+		var cv=document.getElementById("bullseyeCanvas");
 		var ctx=cv.getContext("2d");
-		ctx.strokeStyle=this.spiralPointColor;
+		ctx.strokeStyle=this.bullseyePointColor;
+		
+		if (this.euclidDistance(start)==0) {
+			ctx.beginPath();
+			ctx.arc(this.xpos,this.ypos,1,0,2*Math.PI);
+			ctx.stroke();
+		}
+			
+		else {
+	
 		ctx.beginPath();
 		ctx.moveTo(start.xpos,start.ypos);
 		ctx.lineTo(this.xpos,this.ypos);	
 		ctx.stroke();
+			
+		}
 	}
 	
 	euclidDistance(p) {
@@ -59,24 +71,8 @@ class spiralPoint {
 		return(Math.abs(this.radDistance(p)/this.angularDifference(p)));
 	}
 	
-	dispFromSpiral() {
-		if (currentSpiral == 0) { drawSpiral = lhSpiral; }
-		else if (currentSpiral == 2) { drawSpiral = lhSpiral; }
-		var minDist=1000000;var mini=0;
-		var ctx=document.getElementById("spiralCanvas").getContext("2d");
-		ctx.strokeStyle="red";
-		ctx.beginPath();
-		ctx.moveTo(this.xpos,this.ypos);
-		for (i=0;i<200;i++) {
-			var cDist=this.euclidDistance(drawSpiral[i]);
-			if (cDist<minDist) {
-				minDist=cDist;	
-				mini=i;
-			}
-		}	
-		ctx.lineTo(drawSpiral[mini].xpos,drawSpiral[mini].ypos);
-		ctx.stroke();	
-		return(minDist);
+	dispFrombullseye(p) {	
+		return(this.euclidDistance(p));
 	}	
 };
 
@@ -85,7 +81,7 @@ function openDB() {
 	let dbReq = indexedDB.open('ETdatabase',1);
 	dbReq.onupgradeneeded = function(event) {
 		db = event.target.result; 
-		let storage = db.createObjectStore('spiralStorage', {autoIncrement: true});
+		let storage = db.createObjectStore('bullseyeStorage', {autoIncrement: true});
 	}
 	dbReq.onsuccess = function(event) {
 		db = event.target.result; 
@@ -98,8 +94,8 @@ function openDB() {
 
 function saveResults() {
 	if (db==null) { openDB(); }
-	let tx=db.transaction(['spiralStorage'],'readwrite');
-	let store = tx.objectStore('spiralStorage');
+	let tx=db.transaction(['bullseyeStorage'],'readwrite');
+	let store = tx.objectStore('bullseyeStorage');
 	
 	var result = document.getElementById('resultsBar').innerHTML;
 	result = result.substring(7);
@@ -116,8 +112,8 @@ function saveResults() {
 }
 
 function getResults() {
-	let tx = db.transaction(['spiralStorage'],'readonly');
-	let item = tx.objectStore('spiralStorage');
+	let tx = db.transaction(['bullseyeStorage'],'readonly');
+	let item = tx.objectStore('bullseyeStorage');
 	let req = item.openCursor();
 	let allItems = [];
 	
@@ -138,7 +134,7 @@ function getResults() {
 }
 
 function clearDatabase() {
-	var req=indexedDB.deleteDatabase('spiralStorage');
+	var req=indexedDB.deleteDatabase('bullseyeStorage');
 	req.onsuccess = function(event) { alert('Success.');}
 	req.onblocked = function(event) {alert('Blocked.');}
 	req.onerror = function(event) { alert(event.target.errorCode);}
@@ -148,7 +144,7 @@ var resultStore = [];
 var plotting = false;
 function togglePlot() {
 	plotting = !plotting;
-	var cv=document.getElementById("spiralCanvas");
+	var cv=document.getElementById("bullseyeCanvas");
 	cv.width = (plotting?0:320);
 	cv.height = (plotting?0:320);
 }
@@ -222,7 +218,7 @@ function drawResults(a) {
 	resultStore = a;
 	
 	clearCanvas();
-	var ctx=document.getElementById('spiralCanvas').getContext('2d');
+	var ctx=document.getElementById('bullseyeCanvas').getContext('2d');
 	ctx.strokeStyle='black';
 	ctx.globalAlpha = 1.0;
 	ctx.lineWidth = 3;
@@ -267,22 +263,42 @@ function drawResults(a) {
 
 function pageLoad() {
 
-document.getElementById("spiralCanvas").onmousemove = function(e) {
+document.getElementById("bullseyeCanvas").onmousemove = function(e) {
 	if (e.buttons==1){
-	var cv=document.getElementById("spiralCanvas");
+	var cv=document.getElementById("bullseyeCanvas");
 	var bounds=cv.getBoundingClientRect();
 	var d=new Date();
-	userSpiral.push(new spiralPoint(e.offsetX,e.offsetY,d.getTime()));
+	userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,d.getTime()));
 	}
 }
 
-originX=document.getElementById("spiralCanvas").width*0.5;
-originY=document.getElementById("spiralCanvas").height*0.5;
+document.getElementById("bullseyeCanvas").addEventListener('mousedown',mouseDownFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunction,false);
+
+originX=document.getElementById("bullseyeCanvas").width*0.5;
+originY=document.getElementById("bullseyeCanvas").height*0.5;
 
 window.setInterval(intervalWrapper,20);
 window.addEventListener('resize',resizeCanvas, false);
 resizeCanvas();
 openDB();
+}
+
+var mouseDownTime = 0;
+var mouseUpTime = 0;
+function mouseDownFunction(e) {
+	mouseDownTime = new Date();
+}
+	
+function mouseUpFunction(e) {
+	if (mouseDownTime != 0) {
+	mouseUpTime = new Date();
+	var cv=document.getElementById("bullseyeCanvas");
+	var bounds=cv.getBoundingClientRect();
+	for (var i=0; i<(mouseUpTime-mouseDownTime)/100;i++)
+		userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,mouseDownTime+i*100));
+	mouseDownTime = 0; mouseUpTime = 0;
+	}
 }
 
 function returnHome() {
@@ -292,36 +308,36 @@ function returnHome() {
 function intervalWrapper() {
 	if (!plotting) {
 		document.getElementById('plotArea').innerHTML = "";
-		drawUserSpirals();
+		drawUserbullseyes();
 	}
 	else {
 		getResults();
 	}
 }
 
-function drawUserSpirals() {
+function drawUserbullseyes() {
 	if (!analyzed) clearCanvas();
-	if (drawBackgroundSpiral) 
-		drawBGSpiral();
-	var ctx=document.getElementById("spiralCanvas").getContext("2d");	
+	if (drawBackgroundbullseye) 
+		drawBGbullseye();
+	var ctx=document.getElementById("bullseyeCanvas").getContext("2d");	
 	ctx.strokeStyle="black";
 	ctx.globalAlpha=1.0;
-	for (i=1;i<userSpiral.length;i++)
-		userSpiral[i].drawSpiralPoint(userSpiral[i-1]);
+	for (i=1;i<userbullseye.length;i++)
+		userbullseye[i].drawbullseyePoint(userbullseye[i-1]);
 }
 
 function mean_drdt() {
 	var mean=0;	
-	for (i=1;i<userSpiral.length;i++)
-		mean+=(userSpiral[i].drdt(userSpiral[i-1]));
-	return((mean/(userSpiral.length-1)).toFixed(3));
+	for (i=1;i<userbullseye.length;i++)
+		mean+=(userbullseye[i].drdt(userbullseye[i-1]));
+	return((mean/(userbullseye.length-1)).toFixed(3));
 }
 
 function mean_drdphi() {
 	var mean=0;	
-	for (i=1;i<userSpiral.length;i++)
-		mean+=(userSpiral[i].drdphi(userSpiral[i-1]));
-	return((mean/(userSpiral.length-1)).toFixed(3));
+	for (i=1;i<userbullseye.length;i++)
+		mean+=(userbullseye[i].drdphi(userbullseye[i-1]));
+	return((mean/(userbullseye.length-1)).toFixed(3));
 }
 
 function max(arr) {
@@ -341,10 +357,10 @@ function maxInd(arr) {
 }
 
 var RMSE; 
-function spiralError() {
-	 RMSE=[];	
-	for (ji=0;ji<userSpiral.length;ji++) {
-		RMSE.push(Math.pow(userSpiral[ji].dispFromSpiral(),1));	
+function bullseyeError() {
+	RMSE=[];
+	for (ji=1;ji<userbullseye.length;ji++) {
+		RMSE.push(Math.pow(userbullseye[ji].dispFrombullseye(userbullseye[0]),1));	
 	}
 	var mean = RMSE.reduce((a,b) => a + b, 0) / RMSE.length;
 	var std = 0;
@@ -352,7 +368,7 @@ function spiralError() {
 		std = std + Math.pow(RMSE[ji]-mean,2);
 	std = std / RMSE.length;
 	
-	var rads = []; for (var i=0;i<userSpiral.length;i++) rads.push(userSpiral[i].r);
+	var rads = []; for (var i=0;i<userbullseye.length;i++) rads.push(userbullseye[i].x);
 	var dftResult = dft(rads);
 	var mags = [];
 	for (var i=0;i<dftResult.length;i++)
@@ -361,7 +377,7 @@ function spiralError() {
 	var fs=(1000/getSamplesPerSec());
 	var freq = maxMag * fs / RMSE.length;
 	
-	var ctx=document.getElementById("spiralCanvas").getContext("2d");
+	var ctx=document.getElementById("bullseyeCanvas").getContext("2d");
     ctx.strokeStyle="red";
     ctx.globalAlpha=1.0;
 	ctx.beginPath();
@@ -377,55 +393,47 @@ function spiralError() {
 }
 
 function getSamplesPerSec() {
-	return((userSpiral[userSpiral.length-1].time-userSpiral[0].time)/userSpiral.length);
+	return((userbullseye[userbullseye.length-1].time-userbullseye[0].time)/userbullseye.length);
 }
 
-function analyzeSpiral() {
+function analyzebullseye() {
 	analyzed = true;
 	var print = "";
-	/*if (currentSpiral == 0 || currentSpiral == 2) { print = ("drdt: "+mean_drdt()+" drdphi: "+mean_drdphi()+" RMSE: "+spiralError()); }
+	/*if (currentbullseye == 0 || currentbullseye == 2) { print = ("drdt: "+mean_drdt()+" drdphi: "+mean_drdphi()+" RMSE: "+bullseyeError()); }
 	else {  print = ("drdt: "+mean_drdt()+" drdphi: "+mean_drdphi()); }*/
-	var error = spiralError(); 
+	var error = bullseyeError(); 
 	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz";
 }
 
-function drawBGSpiral() {
+function drawBGbullseye() {
 
-	originX=document.getElementById("spiralCanvas").width*0.5;
-	originY=document.getElementById("spiralCanvas").height*0.5;
-	var angleMod = (drawBackgroundSpiral>0?drawBackgroundSpiral:-10)+5; 
-	var ctx=document.getElementById("spiralCanvas").getContext("2d");
+	originX=document.getElementById("bullseyeCanvas").width*0.5;
+	originY=document.getElementById("bullseyeCanvas").height*0.5; 
+	var ctx=document.getElementById("bullseyeCanvas").getContext("2d");
 	ctx.globalAlpha=0.6;
-	ctx.strokeStyle="lightgrey";
-	ctx.beginPath();	
-	ctx.moveTo(originX,originY);	
-	for (i=0;i<200;i++) {
-		var angle=0.1*i;
-		x=(angleMod*angle)*Math.cos(angle);
-		y=(angleMod*angle)*Math.sin(angle);
-		lhSpiral.push(new spiralPoint(x+originX,y+originY,0));
-		ctx.lineTo(x+originX,y+originY);
-	}	
+	ctx.strokeStyle="grey";
+	ctx.beginPath();
+	ctx.arc(originX,originY,document.getElementById("bullseyeCanvas").width*(drawBackgroundbullseye/100),0,2*Math.PI);
 	ctx.stroke();
 
 }
 
 function clearCanvas() {
-	var cv=document.getElementById("spiralCanvas");
+	var cv=document.getElementById("bullseyeCanvas");
 	var ctx=cv.getContext("2d");
 	ctx.fillStyle="white";
 	ctx.fillRect(0,0,cv.width,cv.height);
-	lhSpiral = [];
-	rhSpiral = [];
-	drawSpiral = [];
+	lhbullseye = [];
+	rhbullseye = [];
+	drawbullseye = [];
 }
 
-function resetSpiral() {
+function resetbullseye() {
 	analyzed = false;
-	userSpiral.length=0;
-	userSpiral=[];
+	userbullseye.length=0;
+	userbullseye=[];
 	clearCanvas();
-	drawBGSpiral();
+	drawBGbullseye();
 	document.getElementById("resultsBar").innerHTML = "Error: ";
 }
 
@@ -443,7 +451,7 @@ function handleButton() {
 
 function emailResults() {
 	/*var results = document.getElementById("footer").innerHTML;
-	if (results = "") analyzeSpiral();
+	if (results = "") analyzebullseye();
 	
 	Email.send({
 	Host: "smtp.gmail.com",
@@ -457,17 +465,17 @@ function emailResults() {
 	);*/		
 }
 
-function toggleSpiral() {
-	drawBackgroundSpiral++;
-	if (drawBackgroundSpiral > 5) {
-		drawBackgroundSpiral = 0; 
+function togglebullseye() {
+	drawBackgroundbullseye++;
+	if (drawBackgroundbullseye > 5) {
+		drawBackgroundbullseye = 0; 
 	}
 	clearCanvas();
-	drawBGSpiral();
+	drawBGbullseye();
 }
 
 function resizeCanvas() {
-	document.getElementById("spiralCanvas").width = 320;
-	document.getElementById("spiralCanvas").height = 320;
+	document.getElementById("bullseyeCanvas").width = 320;
+	document.getElementById("bullseyeCanvas").height = 320;
 	clearCanvas();		
 }// JavaScript Document
