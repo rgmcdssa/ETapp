@@ -20,6 +20,10 @@ function genSineWave(N,freq,amp) {
 	return(res);
 }
 
+function toComplexNumber(xx,yy) {
+	return(new ComplexNumber({re: xx, im: yy}));
+}
+
 class ComplexNumber {
   /**
    * z = re + im * i

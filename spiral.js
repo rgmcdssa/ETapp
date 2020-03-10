@@ -352,14 +352,15 @@ function spiralError() {
 		std = std + Math.pow(RMSE[ji]-mean,2);
 	std = std / RMSE.length;
 	
-	var rads = []; for (var i=0;i<userSpiral.length;i++) rads.push(userSpiral[i].r);
+	rads = []; for (var i=0;i<userSpiral.length;i++) rads.push(toComplexNumber(userSpiral[i].xpos-originX,userSpiral[i].ypos-originY));
 	var dftResult = dft(rads);
 	var mags = [];
 	for (var i=0;i<dftResult.length;i++)
 		mags.push(complexMagnitude(dftResult[i]));
 	var maxMag = mags.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax , 0);
 	var fs=(1000/getSamplesPerSec());
-	var freq = maxMag * fs / RMSE.length;
+	fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
+	var freq = fss[maxMag];
 	
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
     ctx.strokeStyle="red";
@@ -377,7 +378,14 @@ function spiralError() {
 }
 
 function getSamplesPerSec() {
-	return((userSpiral[userSpiral.length-1].time-userSpiral[0].time)/userSpiral.length);
+	var startTime = userSpiral[0].time;
+	var currTime = userSpiral[0].time;
+	var i;
+	for (i=1;i<userSpiral.length;i++) {
+		if (userSpiral[i].time - startTime > 1000) 
+			break;
+	}
+	return(i);
 }
 
 function analyzeSpiral() {

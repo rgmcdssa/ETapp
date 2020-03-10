@@ -296,7 +296,7 @@ function mouseUpFunction(e) {
 	var cv=document.getElementById("bullseyeCanvas");
 	var bounds=cv.getBoundingClientRect();
 	for (var i=0; i<(mouseUpTime-mouseDownTime)/100;i++)
-		userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,mouseDownTime+i*100));
+		userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,mouseDownTime.getTime()+i*100));
 	mouseDownTime = 0; mouseUpTime = 0;
 	}
 }
@@ -357,6 +357,9 @@ function maxInd(arr) {
 }
 
 var RMSE; 
+var dftResult;
+var rads;
+var mags;
 function bullseyeError() {
 	RMSE=[];
 	for (ji=1;ji<userbullseye.length;ji++) {
@@ -368,14 +371,18 @@ function bullseyeError() {
 		std = std + Math.pow(RMSE[ji]-mean,2);
 	std = std / RMSE.length;
 	
-	var rads = []; for (var i=0;i<userbullseye.length;i++) rads.push(userbullseye[i].x);
-	var dftResult = dft(rads);
-	var mags = [];
+	rads = []; for (var i=0;i<userbullseye.length;i++) rads.push(toComplexNumber(userbullseye[i].xpos-userbullseye[0].xpos,userbullseye[i].ypos-userbullseye[0].ypos));
+	dftResult = dft(rads);
+	mags = [];
 	for (var i=0;i<dftResult.length;i++)
-		mags.push(complexMagnitude(dftResult[i]));
+		mags.push(complexMagnitude(dftResult[i]).toFixed(2));
+	//mags[0]=0; 
 	var maxMag = mags.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax , 0);
 	var fs=(1000/getSamplesPerSec());
-	var freq = maxMag * fs / RMSE.length;
+	var fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
+	var freq = fss[maxMag];
+	//var freq = maxMag * fs / mags.length;
+	
 	
 	var ctx=document.getElementById("bullseyeCanvas").getContext("2d");
     ctx.strokeStyle="red";
@@ -393,7 +400,14 @@ function bullseyeError() {
 }
 
 function getSamplesPerSec() {
-	return((userbullseye[userbullseye.length-1].time-userbullseye[0].time)/userbullseye.length);
+	var startTime = userbullseye[0].time;
+	var currTime = userbullseye[0].time;
+	var i;
+	for (i=1;i<userbullseye.length;i++) {
+		if (userbullseye[i].time - startTime > 1000) 
+			break;
+	}
+	return(i);
 }
 
 function analyzebullseye() {
