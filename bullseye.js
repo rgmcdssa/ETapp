@@ -274,8 +274,8 @@ document.getElementById("bullseyeCanvas").onmousemove = function(e) {
 
 document.getElementById("bullseyeCanvas").addEventListener('mousedown',mouseDownFunction,false);
 document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('ontouchstart',mouseDownFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('ontouchend',mouseUpFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('touchstart',mouseDownFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('touchend',mouseUpFunction,false);
 	
 originX=document.getElementById("bullseyeCanvas").width*0.5;
 originY=document.getElementById("bullseyeCanvas").height*0.5;
@@ -289,10 +289,12 @@ openDB();
 var mouseDownTime = 0;
 var mouseUpTime = 0;
 function mouseDownFunction(e) {
+	e.preventDefault();
 	mouseDownTime = new Date();
 }
 	
 function mouseUpFunction(e) {
+	e.preventDefault();
 	if (mouseDownTime != 0) {
 	mouseUpTime = new Date();
 	var cv=document.getElementById("bullseyeCanvas");
