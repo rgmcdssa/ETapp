@@ -274,7 +274,9 @@ document.getElementById("bullseyeCanvas").onmousemove = function(e) {
 
 document.getElementById("bullseyeCanvas").addEventListener('mousedown',mouseDownFunction,false);
 document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunction,false);
-
+document.getElementById("bullseyeCanvas").addEventListener('touchstart',mouseDownFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('touchend',mouseUpFunction,false);
+	
 originX=document.getElementById("bullseyeCanvas").width*0.5;
 originY=document.getElementById("bullseyeCanvas").height*0.5;
 
