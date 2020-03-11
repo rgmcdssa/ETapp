@@ -277,7 +277,6 @@ document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunc
 document.getElementById("bullseyeCanvas").addEventListener('touchstart',mouseDownFunction,false);
 document.getElementById("bullseyeCanvas").addEventListener('touchend',mouseUpFunction,false);
 	
-	
 originX=document.getElementById("bullseyeCanvas").width*0.5;
 originY=document.getElementById("bullseyeCanvas").height*0.5;
 
@@ -290,12 +289,10 @@ openDB();
 var mouseDownTime = 0;
 var mouseUpTime = 0;
 function mouseDownFunction(e) {
-	e.preventDefault();
 	mouseDownTime = new Date();
 }
 	
 function mouseUpFunction(e) {
-	e.preventDefault()
 	if (mouseDownTime != 0) {
 	mouseUpTime = new Date();
 	var cv=document.getElementById("bullseyeCanvas");
@@ -376,12 +373,13 @@ function bullseyeError() {
 		std = std + Math.pow(RMSE[ji]-mean,2);
 	std = std / RMSE.length;
 	
-	rads = []; for (var i=0;i<userbullseye.length;i++) rads.push(toComplexNumber(userbullseye[i].xpos-userbullseye[0].xpos,userbullseye[i].ypos-userbullseye[0].ypos));
+	//rads = []; for (var i=0;i<userbullseye.length;i++) rads.push(toComplexNumber(userbullseye[i].xpos-userbullseye[0].xpos,userbullseye[i].ypos-userbullseye[0].ypos));
+	rads = []; for (var i=0;i<userbullseye.length;i++) rads.push(toComplexNumber(userbullseye[i].r,userbullseye[i].phi));
 	dftResult = dft(rads);
 	mags = [];
 	for (var i=0;i<dftResult.length;i++)
 		mags.push(complexMagnitude(dftResult[i]).toFixed(2));
-	//mags[0]=0; 
+	mags[0]=0; 
 	var maxMag = mags.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax , 0);
 	var fs=(1000/getSamplesPerSec());
 	var fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
