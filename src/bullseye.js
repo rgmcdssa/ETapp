@@ -289,6 +289,7 @@ openDB();
 var mouseDownTime = 0;
 var mouseUpTime = 0;
 function mouseDownFunction(e) {
+	alert('down');
 	mouseDownTime = new Date();
 }
 	
