@@ -272,12 +272,19 @@ document.getElementById("bullseyeCanvas").onmousemove = function(e) {
 	}
 }
 
+document.getElementById("bullseyeCanvas").ontouchmove = function(e) {
+	if (e.buttons==1){
+	var cv=document.getElementById("bullseyeCanvas");
+	var bounds=cv.getBoundingClientRect();
+	var d=new Date();
+	userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,d.getTime()));
+	}
+}
+
 document.getElementById("bullseyeCanvas").addEventListener('mousedown',mouseDownFunction,false);
 document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunction,false);
 document.getElementById("bullseyeCanvas").addEventListener('touchstart',mouseDownFunction,false);
 document.getElementById("bullseyeCanvas").addEventListener('touchend',mouseUpFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('vmousedown',mouseDownFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('vmousemove',mouseUpFunction,false);
 	//big change to make github trigger
 	
 	
