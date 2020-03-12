@@ -274,18 +274,31 @@ document.getElementById("bullseyeCanvas").onmousemove = function(e) {
 
 document.getElementById("bullseyeCanvas").ontouchmove = function(e) {
 	if (e.buttons==1){
+		var touch=e.touches[0];
 	var cv=document.getElementById("bullseyeCanvas");
 	var bounds=cv.getBoundingClientRect();
 	var d=new Date();
-	userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,d.getTime()));
+	userbullseye.push(new bullseyePoint(touch.clientX,touch.clientY,d.getTime()));
 	}
 }
 
 document.getElementById("bullseyeCanvas").addEventListener('mousedown',mouseDownFunction,false);
 document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('touchstart',mouseDownFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('touchend',mouseUpFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('touchstart',touchDownFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('touchend',touchUpFunction,false);
 	//big change to make github trigger
+	
+document.body.addEventListener("touchstart",function(e)) {
+if (e.target==document.getElementById("spiralCanvas")) {
+e.preventDefault();}}
+
+document.body.addEventListener("touchend",function(e)) {
+if (e.target==document.getElementById("spiralCanvas")) {
+e.preventDefault();}}
+
+document.body.addEventListener("touchmove",function(e)) {
+if (e.target==document.getElementById("spiralCanvas")) {
+e.preventDefault();}}
 	
 	
 originX=document.getElementById("bullseyeCanvas").width*0.5;
@@ -299,10 +312,16 @@ openDB();
 
 var mouseDownTime = 0;
 var mouseUpTime = 0;
+var touchDownTime = 0;
+var touchUpTime = 0;
 function mouseDownFunction(e) {
 	mouseDownTime = new Date();
 }
 	
+function touchDownFunction(e) {
+	touchDownTime = new Date();
+}
+
 function mouseUpFunction(e) {
 	if (mouseDownTime != 0) {
 	mouseUpTime = new Date();
@@ -311,6 +330,18 @@ function mouseUpFunction(e) {
 	for (var i=0; i<(mouseUpTime-mouseDownTime)/100;i++)
 		userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,mouseDownTime.getTime()+i*100));
 	mouseDownTime = 0; mouseUpTime = 0;
+	}
+}
+
+function touchUpFunction(e) {
+	if (touchDownTime != 0) {
+		var touch=e.touches[0];
+	touchUpTime = new Date();
+	var cv=document.getElementById("bullseyeCanvas");
+	var bounds=cv.getBoundingClientRect();
+	for (var i=0; i<(mouseUpTime-mouseDownTime)/100;i++)
+		userbullseye.push(new bullseyePoint(touch.clientX,touch.clientY,touchDownTime.getTime()+i*100));
+	touchDownTime = 0; touchUpTime = 0;
 	}
 }
 
