@@ -288,7 +288,7 @@ document.getElementById("bullseyeCanvas").addEventListener('touchstart',touchDow
 document.getElementById("bullseyeCanvas").addEventListener('touchend',touchUpFunction,false);
 	//big change to make github trigger
 	
-document.body.addEventListener("touchstart",function(e)) {
+/*document.body.addEventListener("touchstart",function(e)) {
 if (e.target==document.getElementById("spiralCanvas")) {
 e.preventDefault();}}
 
@@ -298,7 +298,7 @@ e.preventDefault();}}
 
 document.body.addEventListener("touchmove",function(e)) {
 if (e.target==document.getElementById("spiralCanvas")) {
-e.preventDefault();}}
+e.preventDefault();}}*/
 	
 	
 originX=document.getElementById("bullseyeCanvas").width*0.5;
