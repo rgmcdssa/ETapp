@@ -1,9 +1,4 @@
 
-
-function fftResults(signal) {
-	var fft = new p5.FFT();
-}
-
 class spiralPoint {
 
 	constructor(xx,yy,tt) {
