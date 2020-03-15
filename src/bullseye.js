@@ -98,58 +98,6 @@ function procDate(a) {
 	return(a.getMonth()+"/"+a.getDate()+"/"+a.getYear()+" "+a.getHours()+":"+a.getMinutes()+":"+a.getSeconds());
 }
 
-function plotResults(a) {
-	resultStore = a;
-	document.getElementById("plotArea").innerHTML = "";
-
-	var tbl = document.createElement('table');
-	var tblBody = document.createElement('tbody');
-	var h=document.createElement('tr');
-	var patientInfo = document.getElementById('userInfo').value;
-	
-	var h1 = document.createElement('th');
-	var h2 = document.createElement('th');
-	var h3 = document.createElement('th');
-	var h4 = document.createElement('th');
-	
-	h1.appendChild(document.createTextNode('Patient'));
-	h2.appendChild(document.createTextNode('Date'));
-	h3.appendChild(document.createTextNode('Error'));
-	h4.appendChild(document.createTextNode('Hand'));
-	h.appendChild(h1); h.appendChild(h2); h.appendChild(h3); h.appendChild(h4);
-	tblBody.appendChild(h);
-	
-	for (i=0; i<resultStore.length; i++) {
-		if (patientInfo != "")
-			if (patientInfo != resultStore[i].patient)
-				continue; 
-		
-		var row=document.createElement('tr');
-		
-		var c1=document.createElement('td');
-		var c2=document.createElement('td');
-		var c3=document.createElement('td');
-		var c4=document.createElement('td');
-		
-		c3.appendChild(document.createTextNode(resultStore[i].patient));
-		row.appendChild(c3);
-		
-		c2.appendChild(document.createTextNode(procDate(new Date(resultStore[i].timestamp))));
-		row.appendChild(c2);
-		
-		c1.appendChild(document.createTextNode(resultStore[i].text));
-		row.appendChild(c1);
-		
-		c4.appendChild(document.createTextNode(resultStore[i].hand));
-		row.appendChild(c4);
-		tblBody.appendChild(row);
-	}
-		 
-	tbl.appendChild(tblBody);
-	
-	document.getElementById('plotArea').appendChild(tbl);
-}
-
 function handleEvents() {
 	document.getElementById("bullseyeCanvas").onmousemove = function(e) {
 	if (e.buttons==1){
@@ -283,7 +231,7 @@ function intervalWrapper() {
 		drawUserbullseyes();
 	}
 	else {
-		getResults();
+		getResults('bullseye');
 	}
 }
 
