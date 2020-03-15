@@ -80,6 +80,69 @@ class spiralPoint {
 	}	
 };
 
+let db; 
+function openDB() {
+	let dbReq = indexedDB.open('ETdatabase',1);
+	dbReq.onupgradeneeded = function(event) {
+		db = event.target.result; 
+		let storage = db.createObjectStore('spiralStorage', {autoIncrement: true});
+	}
+	dbReq.onsuccess = function(event) {
+		db = event.target.result; 
+	}
+	
+	dbReq.onerror=function(event) {
+		alert('Error opening database: '+event.target.errorCode);
+	}
+}
+
+function saveResults() {
+	if (db==null) { openDB(); }
+	let tx=db.transaction(['spiralStorage'],'readwrite');
+	let store = tx.objectStore('spiralStorage');
+	
+	var result = document.getElementById('resultsBar').innerHTML;
+	result = result.substring(7);
+	var patientInfo = document.getElementById('userInfo').value;
+	
+	let item = {patient: patientInfo, text: result, timestamp: Date.now(), hand: currentHand};
+	store.add(item);
+	
+	tx.oncomplete = function() { alert('Storage complete.');
+	}
+	tx.onerror = function(event) {
+		alert('Error storing: '+event.target.errorCode);
+	}
+}
+
+function getResults() {
+	let tx = db.transaction(['spiralStorage'],'readonly');
+	let item = tx.objectStore('spiralStorage');
+	let req = item.openCursor();
+	let allItems = [];
+	
+	req.onsuccess = function(event) {
+		let cursor=event.target.result;
+		if (cursor != null) {
+			allItems.push(cursor.value);
+			cursor.continue();
+		}
+		else {
+			plotResults(allItems);
+		}
+	}
+	
+	req.onerror = function(event) {
+		alert('Error in plot: '+event.target.errorCode);
+	}
+}
+
+function clearDatabase() {
+	var req=indexedDB.deleteDatabase('spiralStorage');
+	req.onsuccess = function(event) { alert('Success.');}
+	req.onblocked = function(event) {alert('Blocked.');}
+	req.onerror = function(event) { alert(event.target.errorCode);}
+}
 
 var resultStore = [];
 var plotting = false;
@@ -105,8 +168,8 @@ function procDate(a) {
 
 function plotResults(a) {
 	resultStore = a;
-	document.getElementById("plotArea").innerHTML = "";
-
+	document.getElementById('plotArea').innerHTML = "";
+	
 	var tbl = document.createElement('table');
 	var tblBody = document.createElement('tbody');
 	var h=document.createElement('tr');
@@ -202,14 +265,6 @@ function drawResults(a) {
 	ctx.fillStyle='black';
 }
 
-function addTouchPoint(e) {
-	e.preventDefault();
-	var cv=document.getElementById("spiralCanvas");
-	var bounds=cv.getBoundingClientRect();
-	var d=new Date();
-	userSpiral.push(new spiralPoint(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,d.getTime()));
-}
-
 function pageLoad() {
 
 document.getElementById("spiralCanvas").onmousemove = function(e) {
@@ -221,22 +276,17 @@ document.getElementById("spiralCanvas").onmousemove = function(e) {
 	}
 }
 
-document.getElementById("spiralCanvas").addEventListener('touchstart',addTouchPoint,{passive: true});
-document.getElementById("spiralCanvas").addEventListener('touchend',addTouchPoint,{passive: true});
-document.getElementById("spiralCanvas").addEventListener('touchmove',addTouchPoint,{passive: true});	
-
-resizeCanvas();
-originX=document.getElementById("spiralCanvas").width*0.45;
+originX=document.getElementById("spiralCanvas").width*0.5;
 originY=document.getElementById("spiralCanvas").height*0.5;
 
 window.setInterval(intervalWrapper,20);
 window.addEventListener('resize',resizeCanvas, false);
-
+resizeCanvas();
 openDB();
 }
 
 function returnHome() {
-	window.location.href = './index.html';
+	window.location.href = './etapp.home.html';
 }
 
 function intervalWrapper() {
@@ -245,7 +295,7 @@ function intervalWrapper() {
 		drawUserSpirals();
 	}
 	else {
-		getResults('spiralStorage');
+		getResults();
 	}
 }
 
@@ -274,25 +324,8 @@ function mean_drdphi() {
 	return((mean/(userSpiral.length-1)).toFixed(3));
 }
 
-function max(arr) {
-	var maxv=0; 
-	for (var i=0;i<arr.length;i++)
-		if (maxv<arr[i]) 
-			maxv=arr[i];
-	return(maxv);
-}
-
-function maxInd(arr) {
-	var maxv=0; var maxi=0; 
-	for (var i=0;i<arr.length;i++)
-		if (maxv<arr[i]) {
-			maxv=arr[i]; maxi=i; }
-	return(maxi);
-}
-
-var RMSE; 
 function spiralError() {
-	 RMSE=[];	
+	var RMSE=[];	
 	for (ji=0;ji<userSpiral.length;ji++) {
 		RMSE.push(Math.pow(userSpiral[ji].dispFromSpiral(),1));	
 	}
@@ -302,38 +335,17 @@ function spiralError() {
 		std = std + Math.pow(RMSE[ji]-mean,2);
 	std = std / RMSE.length;
 	
-	rads = []; for (var i=0;i<userSpiral.length;i++) rads.push(toComplexNumber(userSpiral[i].xpos-originX,userSpiral[i].ypos-originY));
-	var dftResult = dft(rads);
-	var mags = [];
-	for (var i=0;i<dftResult.length;i++)
-		mags.push(complexMagnitude(dftResult[i]));
-	var maxMag = mags.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax , 0);
-	var fs=(1000/getSamplesPerSec());
-	fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
-	var freq = fss[maxMag];
-	
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
-    ctx.strokeStyle="red";
-    ctx.globalAlpha=1.0;
+        ctx.strokeStyle="red";
+        ctx.globalAlpha=1.0;
 	ctx.beginPath();
-	ctx.moveTo(10,10);
+	ctx.moveTo(10,100);
 	for (ji=0;ji<RMSE.length;ji++) {
-		ctx.lineTo(10+ji,10+RMSE[ji]);
+		ctx.lineTo(10+ji,100+RMSE[ji]);
 	}		
-	ctx.stroke();	
-		
-	return([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)]);			
-}
+	ctx.stroke();
 
-function getSamplesPerSec() {
-	var startTime = userSpiral[0].time;
-	var currTime = userSpiral[0].time;
-	var i;
-	for (i=1;i<userSpiral.length;i++) {
-		if (userSpiral[i].time - startTime > 1000) 
-			break;
-	}
-	return(i);
+	return([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2)]);			
 }
 
 function analyzeSpiral() {
@@ -342,11 +354,13 @@ function analyzeSpiral() {
 	/*if (currentSpiral == 0 || currentSpiral == 2) { print = ("drdt: "+mean_drdt()+" drdphi: "+mean_drdphi()+" RMSE: "+spiralError()); }
 	else {  print = ("drdt: "+mean_drdt()+" drdphi: "+mean_drdphi()); }*/
 	var error = spiralError(); 
-	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz";
+	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1];
 }
 
 function drawBGSpiral() {
 
+	originX=document.getElementById("spiralCanvas").width*0.5;
+	originY=document.getElementById("spiralCanvas").height*0.5;
 	var angleMod = (drawBackgroundSpiral>0?drawBackgroundSpiral:-10)+5; 
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
 	ctx.globalAlpha=0.6;
@@ -395,6 +409,22 @@ function handleButton() {
 	}
 }
 
+function emailResults() {
+	/*var results = document.getElementById("footer").innerHTML;
+	if (results = "") analyzeSpiral();
+	
+	Email.send({
+	Host: "smtp.gmail.com",
+	Username: "rgmcds@gmail.com",
+	Password: "thetawaveCOMMANDERPANTS",
+	To: "rgmcds@gmail.com",
+	From: "rgmcds@gmail.com",
+	Subject: (new Date() + " results"),
+	Body: "" + results, 
+	}).then(message => alert("Results sent.");
+	);*/		
+}
+
 function toggleSpiral() {
 	drawBackgroundSpiral++;
 	if (drawBackgroundSpiral > 5) {
@@ -405,7 +435,7 @@ function toggleSpiral() {
 }
 
 function resizeCanvas() {
-	document.getElementById("spiralCanvas").width = 400;
-	document.getElementById("spiralCanvas").height = 315;
+	document.getElementById("spiralCanvas").width = 320;
+	document.getElementById("spiralCanvas").height = 320;
 	clearCanvas();		
 }// JavaScript Document

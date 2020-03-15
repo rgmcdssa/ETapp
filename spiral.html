@@ -10,6 +10,7 @@
 
 <script src="./src/math.js"></script>
 <script src="./src/spiral.js"></script>
+<script src="./src/database.js"></script>
 <script>
 	
 var originX; var originY;
@@ -22,13 +23,15 @@ var rhSpiral = [];
 var drawSpiral = [];
 	
 var currentSpiral=0;
+	
+setTimeout(function(){pageLoad();},50);
 
 </script>
 
 <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 
-<body onload="pageLoad()">
+<body>
 <div class="container"> 
 <!-- Navigation -->
   <!--<header> <a href="">

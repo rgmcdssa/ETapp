@@ -76,6 +76,70 @@ class bullseyePoint {
 	}	
 };
 
+let db; 
+function openDB() {
+	let dbReq = indexedDB.open('ETdatabase',1);
+	dbReq.onupgradeneeded = function(event) {
+		db = event.target.result; 
+		let storage = db.createObjectStore('bullseyeStorage', {autoIncrement: true});
+	}
+	dbReq.onsuccess = function(event) {
+		db = event.target.result; 
+	}
+	
+	dbReq.onerror=function(event) {
+		alert('Error opening database: '+event.target.errorCode);
+	}
+}
+
+function saveResults() {
+	if (db==null) { openDB(); }
+	let tx=db.transaction(['bullseyeStorage'],'readwrite');
+	let store = tx.objectStore('bullseyeStorage');
+	
+	var result = document.getElementById('resultsBar').innerHTML;
+	result = result.substring(7);
+	var patientInfo = document.getElementById('userInfo').value;
+	
+	let item = {patient: patientInfo, text: result, timestamp: Date.now(), hand: currentHand};
+	store.add(item);
+	
+	tx.oncomplete = function() { alert('Storage complete.');
+	}
+	tx.onerror = function(event) {
+		alert('Error storing: '+event.target.errorCode);
+	}
+}
+
+function getResults() {
+	let tx = db.transaction(['bullseyeStorage'],'readonly');
+	let item = tx.objectStore('bullseyeStorage');
+	let req = item.openCursor();
+	let allItems = [];
+	
+	req.onsuccess = function(event) {
+		let cursor=event.target.result;
+		if (cursor != null) {
+			allItems.push(cursor.value);
+			cursor.continue();
+		}
+		else {
+			plotResults(allItems);
+		}
+	}
+	
+	req.onerror = function(event) {
+		alert('Error in plot: '+event.target.errorCode);
+	}
+}
+
+function clearDatabase() {
+	var req=indexedDB.deleteDatabase('bullseyeStorage');
+	req.onsuccess = function(event) { alert('Success.');}
+	req.onblocked = function(event) {alert('Blocked.');}
+	req.onerror = function(event) { alert(event.target.errorCode);}
+}
+
 var resultStore = [];
 var plotting = false;
 function togglePlot() {
@@ -150,24 +214,6 @@ function plotResults(a) {
 	document.getElementById('plotArea').appendChild(tbl);
 }
 
-function handleEvents() {
-	document.getElementById("bullseyeCanvas").onmousemove = function(e) {
-	if (e.buttons==1){
-	var cv=document.getElementById("bullseyeCanvas");
-	var bounds=cv.getBoundingClientRect();
-	var d=new Date();
-	userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,d.getTime()));
-	}
-	}
-	
-document.getElementById("bullseyeCanvas").addEventListener('mousedown',mouseDownFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunction,false);
-document.getElementById("bullseyeCanvas").addEventListener('touchstart',addTouchPoint,{passive: true});
-document.getElementById("bullseyeCanvas").addEventListener('touchend',addTouchPoint,{passive: true});
-document.getElementById("bullseyeCanvas").addEventListener('touchmove',addTouchPoint,{passive: true});
-	
-}
-
 function drawResults(a) {
 	resultStore = a;
 	
@@ -217,36 +263,62 @@ function drawResults(a) {
 
 function pageLoad() {
 
-resizeCanvas();
-originX=document.getElementById('bullseyeCanvas').width*0.45;
+document.getElementById("bullseyeCanvas").onmousemove = function(e) {
+	if (e.buttons==1){
+	var cv=document.getElementById("bullseyeCanvas");
+	var bounds=cv.getBoundingClientRect();
+	var d=new Date();
+	userbullseye.push(new bullseyePoint(e.offsetX,e.offsetY,d.getTime()));
+	}
+}
+
+document.getElementById("bullseyeCanvas").ontouchmove = function(e) {
+	if (e.buttons==1){
+		var touch=e.touches[0];
+	var cv=document.getElementById("bullseyeCanvas");
+	var bounds=cv.getBoundingClientRect();
+	var d=new Date();
+	userbullseye.push(new bullseyePoint(touch.clientX,touch.clientY,d.getTime()));
+	}
+}
+
+document.getElementById("bullseyeCanvas").addEventListener('mousedown',mouseDownFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('mouseup',mouseUpFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('touchstart',touchDownFunction,false);
+document.getElementById("bullseyeCanvas").addEventListener('touchend',touchUpFunction,false);
+	//big change to make github trigger
+	
+/*document.body.addEventListener("touchstart",function(e)) {
+if (e.target==document.getElementById("spiralCanvas")) {
+e.preventDefault();}}
+
+document.body.addEventListener("touchend",function(e)) {
+if (e.target==document.getElementById("spiralCanvas")) {
+e.preventDefault();}}
+
+document.body.addEventListener("touchmove",function(e)) {
+if (e.target==document.getElementById("spiralCanvas")) {
+e.preventDefault();}}*/
+	
+	
+originX=document.getElementById("bullseyeCanvas").width*0.5;
 originY=document.getElementById("bullseyeCanvas").height*0.5;
 
 window.setInterval(intervalWrapper,20);
 window.addEventListener('resize',resizeCanvas, false);
-
+resizeCanvas();
 openDB();
-handleEvents();
 }
 
 var mouseDownTime = 0;
 var mouseUpTime = 0;
 var touchDownTime = 0;
 var touchUpTime = 0;
-
-function addTouchPoint(e) {
-	e.preventDefault();
-	var cv=document.getElementById("bullseyeCanvas");
-	var bounds=cv.getBoundingClientRect();
-	var d=new Date();
-	userbullseye.push(new bullseyePoint(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,d.getTime()));
-}
-
 function mouseDownFunction(e) {
 	mouseDownTime = new Date();
 }
 	
 function touchDownFunction(e) {
-	e.preventDefault();
 	touchDownTime = new Date();
 }
 
@@ -262,13 +334,13 @@ function mouseUpFunction(e) {
 }
 
 function touchUpFunction(e) {
-	e.preventDefault();
 	if (touchDownTime != 0) {
+		var touch=e.touches[0];
 	touchUpTime = new Date();
 	var cv=document.getElementById("bullseyeCanvas");
 	var bounds=cv.getBoundingClientRect();
 	for (var i=0; i<(mouseUpTime-mouseDownTime)/100;i++)
-		userbullseye.push(new bullseyePoint(e.pageX,e.pageY,touchDownTime.getTime()+i*100));
+		userbullseye.push(new bullseyePoint(touch.clientX,touch.clientY,touchDownTime.getTime()+i*100));
 	touchDownTime = 0; touchUpTime = 0;
 	}
 }
@@ -393,7 +465,9 @@ function analyzebullseye() {
 }
 
 function drawBGbullseye() {
- 
+
+	originX=document.getElementById("bullseyeCanvas").width*0.5;
+	originY=document.getElementById("bullseyeCanvas").height*0.5; 
 	var ctx=document.getElementById("bullseyeCanvas").getContext("2d");
 	ctx.globalAlpha=0.6;
 	ctx.strokeStyle="grey";
@@ -451,7 +525,6 @@ function emailResults() {
 }
 
 function togglebullseye() {
-	
 	drawBackgroundbullseye++;
 	if (drawBackgroundbullseye > 5) {
 		drawBackgroundbullseye = 0; 
@@ -461,7 +534,7 @@ function togglebullseye() {
 }
 
 function resizeCanvas() {
-	document.getElementById("bullseyeCanvas").width = 400;
-	document.getElementById("bullseyeCanvas").height = 315;
+	document.getElementById("bullseyeCanvas").width = 320;
+	document.getElementById("bullseyeCanvas").height = 320;
 	clearCanvas();		
 }// JavaScript Document

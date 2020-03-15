@@ -6,12 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ETapp: Digital Neuro Exam</title>
 
-<script type="text/javascript" src="./src/jquery-3.4.1.min.js"></script>
-<script type="text/javascript" src="./src/jcanvas.min.js"></script>
 <script>var __adobewebfontsappname__="dreamweaver"</script>
+
 <script src="./src/math.js"></script>
 <script src="./src/bullseye.js"></script>
-<script src="./src/database.js"></script>
 <script>
 	
 var originX; var originY;
@@ -24,22 +22,32 @@ var rhbullseye = [];
 var drawbullseye = [];
 	
 var currentbullseye=0;
-	
-setTimeout(function(){pageLoad();},100);
-	
+
 </script>
 
 <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 
-<body>
+<body onload="pageLoad()">
 <div class="container"> 
+<!-- Navigation -->
+  <!--<header> <a href="">
+    <h4 class="logo">ETapp: Digital Neuro Exam</h4>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="../etapp.home.html">Home</a></li>
+        <li><a href="../etapp.about.html">About</a></li>
+        <li> <a href="../etapp.contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>-->
 <div id="toolbar">
 <input class="toolbarButton" id="home" onclick="returnHome()" type="image" src="./img/home.jpg" />
 <input class="toolbarButton" id="hand" onclick="handleButton()" type="image" src="./img/left.jpg" />
 <input class="toolbarButton" id="bullseyebutton" onclick="togglebullseye()" type="image" src="./img/bullseye.jpg" />
 <input class="toolbarButton" id="analyze" onclick="analyzebullseye()" type="image" src="./img/analyze.jpg" />
-<input class="toolbarButton" id="saveResult" onclick="saveResults('bullseyeStorage')" type="image" src="./img/save.jpg" /> 
+<input class="toolbarButton" id="saveResult" onclick="saveResults()" type="image" src="./img/save.jpg" /> 
 <input class="toolbarButton" id="getResult" onclick="togglePlot()" type="image" src="./img/plot.jpg" /> 
 <input class="toolbarButton" id="clear" onclick="resetbullseye()" type="image" src="./img/trash.jpg" /> 
 </div>
