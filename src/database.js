@@ -56,7 +56,10 @@ function getResults(targetTest) {
 }
 
 function procDate(a) {
-	return((a.getMonth()+1)+"/"+a.getDate()+"/"+(a.getYear()+1900)+" "+a.getHours()+":"+a.getMinutes()+":"+a.getSeconds());
+	var label=(a.getHours()>12?"PM":"AM");
+	var hours=(a.getHours()>12?a.getHours()-12:a.getHours());
+	var minutes=(a.getMinutes()>9?a.getMinutes():"0"+a.getMinutes());
+	return((a.getMonth()+1)+"/"+a.getDate()+"/"+(a.getYear()+1900)+" "+hours+":"+minutes+label);
 }
 
 function plotResults(a,targetTest) {
