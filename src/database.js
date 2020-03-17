@@ -55,6 +55,10 @@ function getResults(targetTest) {
 	}
 }
 
+function procDate(a) {
+	return((a.getMonth()+1)+"/"+a.getDate()+"/"+(a.getYear()+1900)+" "+a.getHours()+":"+a.getMinutes()+":"+a.getSeconds());
+}
+
 function plotResults(a,targetTest) {
 	resultStore = a;
 	document.getElementById("plotArea").innerHTML = "";

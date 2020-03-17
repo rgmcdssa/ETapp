@@ -99,10 +99,6 @@ function procResults() {
 	return(collect);
 }
 
-function procDate(a) {
-	return(a.getMonth()+"/"+a.getDate()+"/"+a.getYear()+" "+a.getHours()+":"+a.getMinutes()+":"+a.getSeconds());
-}
-
 function drawResults(a) {
 	resultStore = a;
 	
@@ -335,11 +331,11 @@ var currentHand = "L";
 function handleButton() {
 	if (currentHand == "L") {
 		currentHand = "R"; 
-		document.getElementById('hand').src='./img/left.jpg';
+		document.getElementById('hand').src='./img/right.jpg';
 	}
 	else {
 		currentHand = "L"; 
-		document.getElementById('hand').src='./img/right.jpg';
+		document.getElementById('hand').src='./img/left.jpg';
 	}
 }
 

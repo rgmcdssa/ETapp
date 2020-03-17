@@ -94,10 +94,6 @@ function procResults() {
 	return(collect);
 }
 
-function procDate(a) {
-	return(a.getMonth()+"/"+a.getDate()+"/"+a.getYear()+" "+a.getHours()+":"+a.getMinutes()+":"+a.getSeconds());
-}
-
 function handleEvents() {
 	document.getElementById("bullseyeCanvas").onmousemove = function(e) {
 	if (e.buttons==1){
