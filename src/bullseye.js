@@ -370,11 +370,11 @@ var currentHand = "L";
 function handleButton() {
 	if (currentHand == "L") {
 		currentHand = "R"; 
-		document.getElementById('hand').src='./img/left.jpg';
+		document.getElementById('hand').src='./img/right.jpg';
 	}
 	else {
 		currentHand = "L"; 
-		document.getElementById('hand').src='./img/right.jpg';
+		document.getElementById('hand').src='./img/left.jpg';
 	}
 }
 
