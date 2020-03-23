@@ -1,5 +1,5 @@
 // JavaScript Document
-var fudge = 10;
+var fudge = 5;
 class Line {
 
 	constructor(a,b,c,d,e) {
@@ -155,6 +155,7 @@ function cleanLines() {
 
 //Run all these helper functions to bound these letters. 
 var allLetters = [];
+var boxHeights = [];
 function findAllLetters() {
 	lines = [];
 	collectLines();
@@ -163,11 +164,26 @@ function findAllLetters() {
 	collapseLines();
 	cleanLines();
 
+	boxHeights = [];
+	allLetters = [];
 	//Feather the lines so that letters with weird endpoints actually calculate as overlapping. 
 	for (var i=0; i<lines.length;i++) {
-		allLetters.push(boundLine(lines[i]));
+		var keep=boundLine(lines[i]);
+		allLetters.push(keep);
+		boxHeights.push((keep.y2-keep.y1)*(keep.x2-keep.x1));
 		drawBounds(allLetters[allLetters.length-1]);
 	}
+	
+	var quartiles=boxHeights.length/4; 
+	var statHolder = [];
+	for (var i=0; i<4; i++) {
+		statHolder.push(boxHeights.slice(i*quartiles,(i+1)*quartiles).reduce((a,b) => a + b, 0) / quartiles); 
+	}
+	for (var i=statHolder.length-1; i>=0; i--) {
+		statHolder[i]=(statHolder[i]/statHolder[0]).toFixed(2);
+	}
+	
+	document.getElementById("resultsBar").innerHTML += statHolder; 
 }
 
 class Letter {
