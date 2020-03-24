@@ -280,9 +280,9 @@ function handleEvents() {
 	
 	document.getElementById("mainCanvas").ontouchmove = function(e) {
 		e.preventDefault(); 
-		allLines.push(new Line(startX,startY,e.offsetX,e.offsetY,true));
+		allLines.push(new Line(startX,startY,e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,true));
 		ctx.lineTo(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop);
-		startX = e.offsetX; startY = e.offsetY; 
+		startX = e.pageX-e.target.offsetLeft; startY = e.pageY-e.target.offsetTop; 
 	}
 	
 	document.getElementById("mainCanvas").ontouchend = function(e) {
