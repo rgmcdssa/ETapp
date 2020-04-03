@@ -10,8 +10,8 @@ function reset() {
 var audioData=[];
 function recordVoice() {
 	if (document.getElementById("recordButton").value == "Stop") { 
-		rec.stop();
 		document.getElementById("recordButton").value = "Record";
+		rec.stream.getTracks().forEach(function(track) {track.stop();});
 	}
 	else {
 		document.getElementById("recordButton").value = "Stop";
