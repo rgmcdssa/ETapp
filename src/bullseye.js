@@ -222,6 +222,7 @@ function returnHome() {
 }
 
 function intervalWrapper() {
+	document.getElementById('plotArea').height=0; 
 	if (!plotting) {
 		document.getElementById('plotArea').innerHTML = "";
 		drawUserbullseyes();
@@ -254,22 +255,6 @@ function mean_drdphi() {
 	for (i=1;i<userbullseye.length;i++)
 		mean+=(userbullseye[i].drdphi(userbullseye[i-1]));
 	return((mean/(userbullseye.length-1)).toFixed(3));
-}
-
-function max(arr) {
-	var maxv=0; 
-	for (var i=0;i<arr.length;i++)
-		if (maxv<arr[i]) 
-			maxv=arr[i];
-	return(maxv);
-}
-
-function maxInd(arr) {
-	var maxv=0; var maxi=0; 
-	for (var i=0;i<arr.length;i++)
-		if (maxv<arr[i]) {
-			maxv=arr[i]; maxi=i; }
-	return(maxi);
 }
 
 var RMSE; 

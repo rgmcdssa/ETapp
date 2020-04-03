@@ -1,8 +1,4 @@
-
-
-function fftResults(signal) {
-	var fft = new p5.FFT();
-}
+// JavaScript Document
 
 class spiralPoint {
 
@@ -86,8 +82,8 @@ var plotting = false;
 function togglePlot() {
 	plotting = !plotting;
 	var cv=document.getElementById("spiralCanvas");
-	cv.width = (plotting?0:320);
-	cv.height = (plotting?0:320);
+	cv.width = (plotting?0:400);
+	cv.height = (plotting?0:315);
 }
 
 function procResults() {
@@ -154,9 +150,8 @@ function addTouchPoint(e) {
 	userSpiral.push(new spiralPoint(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,d.getTime()));
 }
 
-function pageLoad() {
-
-document.getElementById("spiralCanvas").onmousemove = function(e) {
+function canvasEvents() {
+	document.getElementById("spiralCanvas").onmousemove = function(e) {
 	if (e.buttons==1){
 	var cv=document.getElementById("spiralCanvas");
 	var bounds=cv.getBoundingClientRect();
@@ -167,8 +162,11 @@ document.getElementById("spiralCanvas").onmousemove = function(e) {
 
 document.getElementById("spiralCanvas").addEventListener('touchstart',addTouchPoint,{passive: true});
 document.getElementById("spiralCanvas").addEventListener('touchend',addTouchPoint,{passive: true});
-document.getElementById("spiralCanvas").addEventListener('touchmove',addTouchPoint,{passive: true});	
+document.getElementById("spiralCanvas").addEventListener('touchmove',addTouchPoint,{passive: true});
+}
 
+function pageLoad() {
+canvasEvents();	
 resizeCanvas();
 originX=document.getElementById("spiralCanvas").width*0.45;
 originY=document.getElementById("spiralCanvas").height*0.5;
@@ -177,18 +175,87 @@ window.setInterval(intervalWrapper,20);
 window.addEventListener('resize',resizeCanvas, false);
 
 openDB();
+	
+vid=document.getElementById("videoHolder");
 }
 
 function returnHome() {
 	window.location.href = './index.html';
 }
 
+function binarizePicture(img) {
+	for (var i=0; i<img.data.length; i+=4) {
+		if (img.data[i]+img.data[i+1]+img.data[i+2]>300) {
+			img.data[i]=255; img.data[i+1]=255; img.data[i+2]=255; 
+		}
+		else {
+			img.data[i]=0; img.data[i+1]=0; img.data[i+2]=0;
+		}
+	}
+	pictureSpiral(img);
+	drawBGSpiral(); 
+	return(img); 
+}
+
+function pictureSpiral(img) {
+	var time=0; 
+	for (var i=0; i<img.data.length; i+=4) {
+		if (img.data[i]*img.data[i+1]*img.data[i+2]==0) {
+			var x=(i*img.width);
+			var y=(i/img.width);
+			userSpiral.push(new spiralPoint(x,y,time));
+			time+=20; 
+		}
+	}
+}
+
+function takePicture() {
+	resizeCanvas();
+	var cv = document.getElementById("spiralCanvas");
+	var ctx = cv.getContext("2d");
+	ctx.drawImage(vid,0,0,vid.videoWidth,vid.videoHeight,0,0,cv.width,cv.height);
+	var imgDataURL = cv.toDataURL('image/png');
+	document.getElementById("videoHolder").width = 0; 
+	document.getElementById("videoHolder").height = 0; 
+	var stream = vid.srcObject;
+	stream.getTracks().forEach(function(track) {track.stop();});
+	document.getElementById('plotArea').innerHTML = "";
+	var imgClean=binarizePicture(ctx.getImageData(0,0,cv.width,cv.height));
+	ctx.putImageData(imgClean,0,0);
+	canvasEvents();
+}
+
+function setUpSnap() {
+	var hold="";
+	hold += "<input type='button' value='Take Picture' onclick='takePicture()'></input>";
+	
+	navigator.getUserMedia({"video":true},function(stream){vid.srcObject=stream; vid.play();},function(err){alert(err)});
+	snapset=true;
+	return(hold);
+}
+
+var snapping=false;
+var snapset=false;
 function intervalWrapper() {
-	if (!plotting) {
+	document.getElementById('plotArea').height=0; 
+	if (!plotting && !snapping) {
 		document.getElementById('plotArea').innerHTML = "";
 		drawUserSpirals();
+		snapset=false; 
 	}
-	else {
+	else if (snapping && !snapset) {
+		document.getElementById("spiralCanvas").width=0;
+		document.getElementById("spiralCanvas").height=0;
+		document.getElementById("videoHolder").width = 400; 
+		document.getElementById("videoHolder").height = 315; 
+	    document.getElementById("plotArea").innerHTML = setUpSnap();
+	}
+	else if (plotting) {
+		document.getElementById("videoHolder").width = 0; 
+		document.getElementById("videoHolder").height = 0; 
+		document.getElementById("spiralCanvas").width=400;
+		document.getElementById("spiralCanvas").height=315;
+		snapset=false; 
 		getResults('spiral');
 	}
 }
@@ -218,20 +285,18 @@ function mean_drdphi() {
 	return((mean/(userSpiral.length-1)).toFixed(3));
 }
 
-function max(arr) {
-	var maxv=0; 
-	for (var i=0;i<arr.length;i++)
-		if (maxv<arr[i]) 
-			maxv=arr[i];
-	return(maxv);
-}
-
-function maxInd(arr) {
-	var maxv=0; var maxi=0; 
-	for (var i=0;i<arr.length;i++)
-		if (maxv<arr[i]) {
-			maxv=arr[i]; maxi=i; }
-	return(maxi);
+function interpolateSpiral() {
+	var keep=[];
+	for (var i=0; i<userSpiral.length-1; i++) {
+		var timeDist = userSpiral[i+1].time - userSpiral[i].time; 
+		var xDist = userSpiral[i+1].xpos - userSpiral[i].xpos;
+		var yDist = userSpiral[i+1].ypos - userSpiral[i].ypos;
+		var steps = (timeDist/sampleRate).toFixed(0);
+		for (var j=0; j<(timeDist / sampleRate).toFixed(0); j++)
+			keep.push(toComplexNumber((userSpiral[i].xpos+xDist/steps*j)-originX,(userSpiral[i].ypos+yDist/steps*j)));
+		
+	}
+	return(keep);
 }
 
 var RMSE; 
@@ -247,10 +312,12 @@ function spiralError() {
 	std = std / RMSE.length;
 	
 	rads = []; for (var i=0;i<userSpiral.length;i++) rads.push(toComplexNumber(userSpiral[i].xpos-originX,userSpiral[i].ypos-originY));
+	//rads = interpolateSpiral(); 
 	var dftResult = dft(rads);
 	var mags = [];
 	for (var i=0;i<dftResult.length;i++)
 		mags.push(complexMagnitude(dftResult[i]));
+	//mags[0]=0; 
 	var maxMag = mags.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax , 0);
 	var fs=(1000/getSamplesPerSec());
 	fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
@@ -265,11 +332,13 @@ function spiralError() {
 		ctx.lineTo(10+ji,10+RMSE[ji]);
 	}		
 	ctx.stroke();	
-		
 	return([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)]);			
 }
 
 function getSamplesPerSec() {
+	if (sampleRate != undefined) 
+		return(sampleRate);
+	
 	var startTime = userSpiral[0].time;
 	var currTime = userSpiral[0].time;
 	var i;
@@ -312,6 +381,7 @@ function clearCanvas() {
 	var cv=document.getElementById("spiralCanvas");
 	var ctx=cv.getContext("2d");
 	ctx.fillStyle="white";
+	ctx.globalAlpha=1.0; 
 	ctx.fillRect(0,0,cv.width,cv.height);
 	lhSpiral = [];
 	rhSpiral = [];
@@ -346,6 +416,8 @@ function toggleSpiral() {
 	}
 	clearCanvas();
 	drawBGSpiral();
+	snapset=false; 
+	snapping=false;
 }
 
 function resizeCanvas() {
@@ -353,3 +425,8 @@ function resizeCanvas() {
 	document.getElementById("spiralCanvas").height = 315;
 	clearCanvas();		
 }// JavaScript Document
+
+function snapSpiral() {
+	snapping=!snapping; 
+	plotting=false;
+}

@@ -114,6 +114,9 @@ function plotResults(a,targetTest) {
 	tbl.appendChild(tblBody);
 	
 	document.getElementById('plotArea').appendChild(tbl);
+	
+	document.getElementById('plotArea').height=300; 
+	
 }
 
 function clearDatabase() {

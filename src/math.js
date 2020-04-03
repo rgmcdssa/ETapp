@@ -2,6 +2,23 @@
  * @param {number} radian
  * @return {number}
  */
+
+function max(arr) {
+	var maxv=0; 
+	for (var i=0;i<arr.length;i++)
+		if (maxv<arr[i]) 
+			maxv=arr[i];
+	return(maxv);
+}
+
+function maxInd(arr) {
+	var maxv=0; var maxi=0; 
+	for (var i=0;i<arr.length;i++)
+		if (maxv<arr[i]) {
+			maxv=arr[i]; maxi=i; }
+	return(maxi);
+}
+
 function radianToDegree(radian) {
   return radian * (180 / Math.PI);
 }
