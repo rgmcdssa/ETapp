@@ -16,7 +16,7 @@ class spiralPoint {
 		else if (userSpiral.length > 0) { offsetX = userSpiral[0].xpos; offsetY = userSpiral[0].ypos; }
 		else { offsetX = xx; offsetY = yy; }
 		this.r=Math.sqrt(Math.pow(xx-offsetX,2)+Math.pow(yy-offsetY,2));
-		this.phi=Math.atan2(yy-offsetY,xx-offsetX);
+		this.theta=Math.atan2(yy-offsetY,xx-offsetX);
 	}
 	
 	drawSpiralPoint(start) {	
@@ -48,10 +48,10 @@ class spiralPoint {
 	}
 		
 	angularDifference(p) {
-		return((this.phi!=p.phi?this.phi-p.phi:0.1));
+		return((this.theta!=p.theta?this.theta-p.theta:0.1));
 	}
 	
-	drdphi(p) {
+	drdtheta(p) {
 		return(Math.abs(this.radDistance(p)/this.angularDifference(p)));
 	}
 	
@@ -278,10 +278,10 @@ function mean_drdt() {
 	return((mean/(userSpiral.length-1)).toFixed(3));
 }
 
-function mean_drdphi() {
+function mean_drdtheta() {
 	var mean=0;	
 	for (i=1;i<userSpiral.length;i++)
-		mean+=(userSpiral[i].drdphi(userSpiral[i-1]));
+		mean+=(userSpiral[i].drdtheta(userSpiral[i-1]));
 	return((mean/(userSpiral.length-1)).toFixed(3));
 }
 
@@ -348,21 +348,22 @@ function calculate_drdtheta() {
 	//Find origin point.
 	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
 	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
-
-	//Now calculate r,theta with respect to this point. 
-	//Overwrite the existing r,theta.
-	this.r=Math.sqrt(Math.pow(xx-xorig,2)+Math.pow(yy-yorig,2));
-	this.phi=Math.atan2(yy-xorig,xx-yorig);
 	
-	//Now find the mean of the difference from i to i+1. 
 	var mean_dr=0; var mean_dtheta=0; var mean_drdtheta =0;
-	for (var i=1; i<userSpiral.length; i++) {
-		mean_dr += (userSpiral.r[i+1]-userSpiral.r[i]);
-		var temp=(userSpiral.theta[i+1]-userSpiral.theta[i]); 
+	for (var i=1; i<(userSpiral.length-1); i++) {
+		
+		//Now calculate r,theta with respect to this point. 
+		//Overwrite the existing r,theta.
+		userSpiral[i+1].r=Math.sqrt(Math.pow(userSpiral[i+1].xpos-xorig,2)+Math.pow(userSpiral[i+1].ypos-yorig,2));
+		userSpiral[i+1].theta=Math.atan2(userSpiral[i+1].ypos-xorig,userSpiral[i+1].xpos-yorig);
+		
+		//Now find the mean of the difference from i to i+1. 
+		mean_dr += (userSpiral[i+1].r-userSpiral[i].r);
+		var temp=(userSpiral[i+1].theta-userSpiral[i].theta); 
 		mean_dtheta += temp;
-		if (temp!=0) { mean_drdtheta += (userSpiral.r[i+1]-userSpiral.r[i])/(userSpiral.theta[i+1]-userSpiral.theta[i]); }
+		if (temp!=0) { mean_drdtheta += (userSpiral[i+1].r-userSpiral[i].r)/(userSpiral[i+1].theta-userSpiral[i].theta); }
 	}
-	return([mean_dr/(userSpiral.length()-1), mean_dtheta/(userSpiral.length()-1), mean_drdtheta/(userSpiral.length()-1)]); 
+	return([(mean_dr/(userSpiral.length-1)).toFixed(2), (mean_dtheta/(userSpiral.length-1)).toFixed(2), (mean_drdtheta/(userSpiral.length-1)).toFixed(2)]); 
 }
 
 function getSamplesPerSec() {
@@ -384,7 +385,7 @@ function analyzeSpiral() {
 	analyzed = true;
 	var print = "";
 	var error = spiralError(); 
-	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz" + error[3] + " " + error[4] + " " + error[5];
+	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz " + error[3] + " " + error[4] + " " + error[5];
 }
 
 //Draw the template spiral that users can trace from. 
