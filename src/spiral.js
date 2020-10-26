@@ -382,26 +382,42 @@ RMS = sqrt( ( sum over N of dr^2 ) / N-2 )
 
 first order smooth = natural log [ 1/total spiral angle * sum ( (dr/dtheta - RMS)^2 ) ]
 
+second order smooth relies on the derivative of the RMS
+derivative of RMS: 
+since RMS = sqrt( sum ( r_obs - r_act)^2 ) / (n - 2) )
+deriv = 1/2 * (  (2 * sum (r_obs-r_act)) / (n-2)  )^-1/2
+
+second order smooth = natural log [ 1/total spiral angle* sum( (change in dr/dtheta)/dtheta - drms)^2 ]
 
 Return: array with RMS of r, first smooth, second smooth, first zero-cross, second zero-cross. 
 */
 function calculate_firstsecond() {
-	var rms=0; var firstSmooth = 0; var secondSmooth = 0; 
+	var rms=0; var firstSmooth = 0; var drms = 0; var secondSmooth = 0; 
 	
 	//First calculate the rms value. Will be used for other calculations. 
-	for (var i=0; i<userSpiral.length; i++) {
+	for (var i=0; i<userSpiral.length-1; i++) {
 		rms += userSpiral[i].dr^2; 
+		drms += userSpiral[i].dr; 
 	}
 	rms = Math.sqrt((rms/(userSpiral.length-2))); 
+	drms = 0.5 * Math.sqrt( 2 * drms / (userSpiral.length-2));
 	
 	//Now calculate first order smoothness. 
-	for (var i=0; i<userSpiral.length; i++) {
+	for (var i=0; i<userSpiral.length-1; i++) {
 		if (userSpiral[i].dtheta!=0) {
-		firstSmooth += (userSpiral[i].dr/userSpiral[i].dtheta - rms)^2; }
+		firstSmooth += (userSpiral[i].dr/userSpiral[i].dtheta - rms); }
 	}
-	firstSmooth = Math.log(firstSmooth*1/6.28319); // 360 degrees in radians
+	firstSmooth = Math.log(firstSmooth^2*1/6.28319); // 360 degrees in radians
 	
-	return([rms.toFixed(2), firstSmooth.toFixed(2)])
+	//Now calculate second order smoothness. 
+	for (var i=0; i<userSpiral.length-2; i++) {
+		if (userSpiral[i].dtheta*userSpiral[i+1].dtheta!=0) {
+			var ddrdtheta = userSpiral[i].dr/userSpiral[i].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta; }
+		secondSmooth = ddrdtheta/userSpiral[i].dtheta - drms;
+	}
+	secondSmooth = Math.log(secondSmooth^2*1/6.28319);
+	
+	return([rms.toFixed(2), firstSmooth.toFixed(2),secondSmooth.toFixed(2)])
 }
 
 function getSamplesPerSec() {
