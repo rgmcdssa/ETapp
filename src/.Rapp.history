@@ -1,0 +1,10 @@
+a=1:360
+b=a*pi/180
+b
+round(b,3)
+length(unique(round(b,3))
+)
+length(unique(round(b,3)))
+length(unique(round(b,2)))
+length(unique(round(b,1)))
+length(unique(round(b,2)))
