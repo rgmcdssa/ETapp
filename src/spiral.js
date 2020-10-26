@@ -480,6 +480,56 @@ function calculate_firstsecond() {
 	return([rms.toFixed(2), firstSmooth.toFixed(2),secondSmooth.toFixed(2),firstCrossing.toFixed(2), secondCrossing.toFixed(2)]);
 }
 
+/* 
+Calculate the distance between spiral points at same angle.
+
+Done because the points user entered are in ascending order of r.
+First identify all possible unique values of theta. 
+Then group points by theta value.
+Finally, calculate difference between consecutive points in each group. 
+Then take the mean of all of them.
+
+Return: mean interspiral interval. 
+*/
+function calculate_interspiral() {
+	//Set up a map of arrays to keep all unique degree values.
+	var degreeR = new Map();
+	for (var i=0; i<=360; i++) {
+		degreeR[i]=[];
+	}
+	//Now loop through every point and put it into its group.
+	for (var i=0; i<userSpiral.length;i++) {
+		//Convert theta from radian to degree.
+		var res=0; 
+		//Fix it so that anything in the quandrants below x-axis are + PI.
+		if (userSpiral[i].theta<0) {
+			res=(Math.PI+userSpiral[i].theta)+Math.PI; 
+		}
+		else { 
+			res=userSpiral[i].theta;
+		}
+		res = Math.round( res * 180 / Math.PI);
+		degreeR[res].push(userSpiral[i].r);	
+	}
+	
+	//Now loop through entire map and gather interspiral interval values;
+	userSpiral.interspiralMeans = []; 
+	for (var k in degreeR) {
+		var mean=0; var count=0; 
+		if (degreeR[k].length>1) {
+			for (var j=0; j<degreeR[k].length-1;j++) {
+				mean+=degreeR[k][j+1]-degreeR[k][j];
+			}
+			count=count+1;	
+			mean=mean/count; 
+			userSpiral.interspiralMeans.push(mean);
+		}
+	}
+	
+	//Now return the mean of means.
+	return((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(2));
+}
+
 /* Set up string to save the results. 
 
 */ 
