@@ -349,8 +349,12 @@ function calculate_drdtheta() {
 	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
 	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
 	
+	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
+	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
+	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-xorig,userSpiral[0].xpos-yorig);
+
 	var mean_dr=0; var mean_dtheta=0; var mean_drdtheta =0;
-	for (var i=1; i<(userSpiral.length-1); i++) {
+	for (var i=0; i<(userSpiral.length-1); i++) {
 		
 		//Now calculate r,theta with respect to this point. 
 		//Overwrite the existing r,theta.
@@ -362,8 +366,42 @@ function calculate_drdtheta() {
 		var temp=(userSpiral[i+1].theta-userSpiral[i].theta); 
 		mean_dtheta += temp;
 		if (temp!=0) { mean_drdtheta += (userSpiral[i+1].r-userSpiral[i].r)/(userSpiral[i+1].theta-userSpiral[i].theta); }
+		
+		userSpiral[i].dr=(userSpiral[i+1].r-userSpiral[i].r);
+		userSpiral[i].dtheta=(userSpiral[i+1].theta-userSpiral[i].theta);
 	}
 	return([(mean_dr/(userSpiral.length-1)).toFixed(2), (mean_dtheta/(userSpiral.length-1)).toFixed(2), (mean_drdtheta/(userSpiral.length-1)).toFixed(2)]); 
+}
+
+/* To be called after calculate_drdtheta.
+Since we have dr, dtheta for the spiral itself at this point, we can calculate first and second order smoothness and zero crossing.
+
+All from 8.9.11.SpiralManual. 
+
+RMS = sqrt( ( sum over N of dr^2 ) / N-2 )
+
+first order smooth = natural log [ 1/total spiral angle * sum ( (dr/dtheta - RMS)^2 ) ]
+
+
+Return: array with RMS of r, first smooth, second smooth, first zero-cross, second zero-cross. 
+*/
+function calculate_firstsecond() {
+	var rms=0; var firstSmooth = 0; var secondSmooth = 0; 
+	
+	//First calculate the rms value. Will be used for other calculations. 
+	for (var i=0; i<userSpiral.length; i++) {
+		rms += userSpiral[i].dr^2; 
+	}
+	rms = Math.sqrt((rms/(userSpiral.length-2))); 
+	
+	//Now calculate first order smoothness. 
+	for (var i=0; i<userSpiral.length; i++) {
+		if (userSpiral[i].dtheta!=0) {
+		firstSmooth += (userSpiral[i].dr/userSpiral[i].dtheta - rms)^2; }
+	}
+	firstSmooth = Math.log(firstSmooth*1/6.28319); // 360 degrees in radians
+	
+	return([rms.toFixed(2), firstSmooth.toFixed(2)])
 }
 
 function getSamplesPerSec() {
