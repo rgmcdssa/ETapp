@@ -332,7 +332,7 @@ function spiralError() {
 		ctx.lineTo(10+ji,10+RMSE[ji]);
 	}		
 	ctx.stroke();	
-	return(concat([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)], calculate_drdtheta()));			
+	return([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)].concat(calculate_drdtheta()));			
 }
 
 /*
