@@ -58,7 +58,7 @@ setTimeout(function(){pageLoad();},50);
 <input class="toolbarButton" id="clear" onclick="resetSpiral()" type="image" src="./img/trash.jpg" /> 
 <input class="toolbarButton" id="clear" onclick="snapSpiral()" type="image" src="./img/camera.jpg" /> 
 </div>
-<div id="resultsBar"> Error: </div>
+<div id="resultsBar"> <textarea id="resultsBarText" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' readonly='true'>Analysis results will be visible here.</textarea></div>
 <div id="userBar"> Patient: <input type="text" id="userInfo" name="userInfo"></div>
 <div id = "plotArea"></div>
 <div id="canvasArea">

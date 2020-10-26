@@ -311,9 +311,18 @@ function spiralError() {
 		std = std + Math.pow(RMSE[ji]-mean,2);
 	std = std / RMSE.length;
 	
+	//DUPLICATE CODE (in case taken out). 
+	//Find origin point.
+	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
+	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
+	
+	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
+	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
+	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-xorig,userSpiral[0].xpos-yorig);
+	
 	//Calculate frequency using dft from raw x and y coordinates. 
-	rads = []; for (var i=0;i<userSpiral.length;i++) {
-		rads.push(toComplexNumber(userSpiral[i].xpos-originX,userSpiral[i].ypos-originY));	
+	rads = []; for (var i=0;i<userSpiral.length-1;i++) {
+		rads.push(toComplexNumber(userSpiral[i].r,userSpiral[i].theta));	
 	}
 	var dftResult = dft(rads);
 	var mags = [];
@@ -333,7 +342,13 @@ function spiralError() {
 		ctx.lineTo(10+ji,10+RMSE[ji]);
 	}		
 	ctx.stroke();	
-	return([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)].concat(calculate_drdtheta()));			
+	
+	var initResults= [(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)];
+	initResults=initResults.concat(calculate_drdtheta());
+	initResults=initResults.concat(calculate_firstsecond());
+
+	console.log("Calculated " + initResults.length + " results.");
+	return(initResults);			
 }
 
 /*
@@ -458,7 +473,6 @@ function calculate_firstsecond() {
 		a=a/userSpiral[i].dtheta;
 		b=b/userSpiral[i+1].dtheta;
 		secondCrossing += ( Math.sign(a-drms_drdtheta) - Math.sign(b-drms_drdtheta) );
-		console.log(secondCrossing);
 		}
 	}
 	secondCrossing = (secondCrossing / 2 / (userSpiral.length-1)) * 100;
@@ -492,7 +506,7 @@ function analyzeSpiral() {
 	analyzed = true;
 	var print = "";
 	var error = spiralError(); 
-	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz " + error[3] + " " + error[4] + " " + error[5];
+	document.getElementById("resultsBarText").value = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz " + "Mean dr: " + error[3] + " Mean dtheta: " + error[4] + " Mean dr/dtheta: " + error[5] + " RMS self: " + error[6] + " 1 Smooth: " + error[7] + " 2 Smooth: " + error[8] + " 1 Crossing: " + error[9] + " 2 Crossing: " + error[10] + "";
 }
 
 //Draw the template spiral that users can trace from. 
