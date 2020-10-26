@@ -311,13 +311,14 @@ function spiralError() {
 		std = std + Math.pow(RMSE[ji]-mean,2);
 	std = std / RMSE.length;
 	
-	rads = []; for (var i=0;i<userSpiral.length;i++) rads.push(toComplexNumber(userSpiral[i].xpos-originX,userSpiral[i].ypos-originY));
-	//rads = interpolateSpiral(); 
+	//Calculate frequency using dft from raw x and y coordinates. 
+	rads = []; for (var i=0;i<userSpiral.length;i++) {
+		rads.push(toComplexNumber(userSpiral[i].xpos-originX,userSpiral[i].ypos-originY));	
+	}
 	var dftResult = dft(rads);
 	var mags = [];
 	for (var i=0;i<dftResult.length;i++)
 		mags.push(complexMagnitude(dftResult[i]));
-	//mags[0]=0; 
 	var maxMag = mags.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax , 0);
 	var fs=(1000/getSamplesPerSec());
 	fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
@@ -384,10 +385,14 @@ first order smooth = natural log [ 1/total spiral angle * sum ( (dr/dtheta - RMS
 
 second order smooth relies on the derivative of the RMS
 derivative of RMS: 
-since RMS = sqrt( sum ( r_obs - r_act)^2 ) / (n - 2) )
-deriv = 1/2 * (  (2 * sum (r_obs-r_act)) / (n-2)  )^-1/2
+since RMS = sqrt( sum ( dr)^2 ) / (n - 2) )
+deriv = 1/2 * (  (2 * sum (dr)) / (n-2)  )^-1/2
 
 second order smooth = natural log [ 1/total spiral angle* sum( (change in dr/dtheta)/dtheta - drms)^2 ]
+
+derivative of RMS dr/dtheta:
+since RMS_drdtheta = sqrt( sum ( (dr/dtheta)^2 ) / (n-2) )
+deriv = 1/2 * ( (2 * sum (dr/dtheta)) / (n-2))^-1/2
 
 Return: array with RMS of r, first smooth, second smooth, first zero-cross, second zero-cross. 
 */
@@ -405,19 +410,67 @@ function calculate_firstsecond() {
 	//Now calculate first order smoothness. 
 	for (var i=0; i<userSpiral.length-1; i++) {
 		if (userSpiral[i].dtheta!=0) {
-		firstSmooth += (userSpiral[i].dr/userSpiral[i].dtheta - rms); }
+			firstSmooth += (userSpiral[i].dr/userSpiral[i].dtheta - rms)^2; 
+		}
 	}
-	firstSmooth = Math.log(firstSmooth^2*1/6.28319); // 360 degrees in radians
+	firstSmooth = Math.log(firstSmooth*1/6.28319); // 360 degrees in radians
 	
 	//Now calculate second order smoothness. 
 	for (var i=0; i<userSpiral.length-2; i++) {
 		if (userSpiral[i].dtheta*userSpiral[i+1].dtheta!=0) {
-			var ddrdtheta = userSpiral[i].dr/userSpiral[i].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta; }
-		secondSmooth = ddrdtheta/userSpiral[i].dtheta - drms;
+			var ddrdtheta = userSpiral[i].dr/userSpiral[i].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta; 
+			secondSmooth += (ddrdtheta/userSpiral[i].dtheta - drms)^2;
+		}
 	}
 	secondSmooth = Math.log(secondSmooth^2*1/6.28319);
 	
-	return([rms.toFixed(2), firstSmooth.toFixed(2),secondSmooth.toFixed(2)])
+	//Now calculate first order zero crossing. 
+	//First calculate the root mean square of dr/dtheta.
+	var rms_drdtheta = 0;
+	for (var i=0; i<userSpiral.length; i++) {
+		if (userSpiral[i].dtheta!=0) rms_drdtheta += (userSpiral[i].dr/userSpiral[i].dtheta)^2; 
+	}
+	rms_drdtheta = Math.sqrt(rms_drdtheta/(userSpiral.length-2));
+	//Then calculate the crossings.
+	var firstCrossing = 0; 
+	for (var i=0; i<userSpiral.length-2; i++) {
+		if (userSpiral[i+1].dtheta*userSpiral[i].dtheta!=0) {
+			var a = Math.sign( userSpiral[i+1].dr/userSpiral[i+1].dtheta - rms_drdtheta );
+			var b = Math.sign( userSpiral[i].dr/userSpiral[i].dtheta - rms_drdtheta );
+			firstCrossing += (a-b);
+		}
+	}
+	firstCrossing = (firstCrossing / 2 / (userSpiral.length-1)) * 100;
+	
+	//Now calculate second order crossing.
+	//First calculate the derivative of rms_drdtheta.
+	var drms_drdtheta = 0;
+	for (var i=0; i<userSpiral.length-1; i++) {
+		if (userSpiral[i].dtheta!=0) drms_drdtheta += (userSpiral[i].dr/userSpiral[i].dtheta); 
+	}
+	drms_drdtheta = 0.5 * Math.sqrt( 2*drms_drdtheta / (userSpiral.length-2) ); 
+		
+	var secondCrossing = 0; 
+	for (var i=0; i<userSpiral.length-3; i++) {
+		if (userSpiral[i].dtheta*userSpiral[i+1].dtheta*userSpiral[i+2].dtheta!=0) {
+		var a = userSpiral[i].dr/userSpiral[i].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta;
+		var b = userSpiral[i+1].dr/userSpiral[i+1].dtheta - userSpiral[i+2].dr/userSpiral[i+2].dtheta;	
+		a=a/userSpiral[i].dtheta;
+		b=b/userSpiral[i+1].dtheta;
+		secondCrossing += ( Math.sign(a-drms_drdtheta) - Math.sign(b-drms_drdtheta) );
+		console.log(secondCrossing);
+		}
+	}
+	secondCrossing = (secondCrossing / 2 / (userSpiral.length-1)) * 100;
+	
+	return([rms.toFixed(2), firstSmooth.toFixed(2),secondSmooth.toFixed(2),firstCrossing.toFixed(2), secondCrossing.toFixed(2)]);
+}
+
+/* Set up string to save the results. 
+
+*/ 
+function saveResultsString() {
+	
 }
 
 function getSamplesPerSec() {
