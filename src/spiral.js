@@ -332,7 +332,37 @@ function spiralError() {
 		ctx.lineTo(10+ji,10+RMSE[ji]);
 	}		
 	ctx.stroke();	
-	return([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)]);			
+	return(concat([(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)], calculate_drdtheta()));			
+}
+
+/*
+This function calculates the average change in r, theta, and r/theta.
+The origin is assumed to be the point between the first two points in the original spiral. 
+r,theta transform is then done using that calculated point.
+Delta r refers to the change in r from point i to point i+1. 
+Mean is calculated at the end. 
+
+Return: array with mean dr, dtheta, dr/dtheta
+*/ 
+function calculate_drdtheta() {
+	//Find origin point.
+	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
+	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
+
+	//Now calculate r,theta with respect to this point. 
+	//Overwrite the existing r,theta.
+	this.r=Math.sqrt(Math.pow(xx-xorig,2)+Math.pow(yy-yorig,2));
+	this.phi=Math.atan2(yy-xorig,xx-yorig);
+	
+	//Now find the mean of the difference from i to i+1. 
+	var mean_dr=0; var mean_dtheta=0; var mean_drdtheta =0;
+	for (var i=1; i<userSpiral.length; i++) {
+		mean_dr += (userSpiral.r[i+1]-userSpiral.r[i]);
+		var temp=(userSpiral.theta[i+1]-userSpiral.theta[i]); 
+		mean_dtheta += temp;
+		if (temp!=0) { mean_drdtheta += (userSpiral.r[i+1]-userSpiral.r[i])/(userSpiral.theta[i+1]-userSpiral.theta[i]); }
+	}
+	return([mean_dr/(userSpiral.length()-1), mean_dtheta/(userSpiral.length()-1), mean_drdtheta/(userSpiral.length()-1)]); 
 }
 
 function getSamplesPerSec() {
@@ -349,15 +379,15 @@ function getSamplesPerSec() {
 	return(i);
 }
 
+//Get the results of analysis and place it in the appropriate textbox. 
 function analyzeSpiral() {
 	analyzed = true;
 	var print = "";
-	/*if (currentSpiral == 0 || currentSpiral == 2) { print = ("drdt: "+mean_drdt()+" drdphi: "+mean_drdphi()+" RMSE: "+spiralError()); }
-	else {  print = ("drdt: "+mean_drdt()+" drdphi: "+mean_drdphi()); }*/
 	var error = spiralError(); 
-	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz";
+	document.getElementById("resultsBar").innerHTML = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz" + error[3] + " " + error[4] + " " + error[5];
 }
 
+//Draw the template spiral that users can trace from. 
 function drawBGSpiral() {
 
 	var angleMod = (drawBackgroundSpiral>0?drawBackgroundSpiral:-10)+5; 
@@ -377,6 +407,7 @@ function drawBGSpiral() {
 
 }
 
+//Clear the entire canvas by painting a white rectangle over the entire thing. Also clear the arrays that hold the background spirals. 
 function clearCanvas() {
 	var cv=document.getElementById("spiralCanvas");
 	var ctx=cv.getContext("2d");
@@ -388,6 +419,7 @@ function clearCanvas() {
 	drawSpiral = [];
 }
 
+//Clear all of the available spiral data, including analysis, and clear the canvas. 
 function resetSpiral() {
 	analyzed = false;
 	userSpiral.length=0;
