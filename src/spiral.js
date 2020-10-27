@@ -559,9 +559,7 @@ function emailResultString() {
 	
 	//Now send the email.
 	Email.send({
-		Host: "smtp.elasticemail.com",
-		Username: "<digitalspiralproject.skmc@gmail.com>",
-		Password: "A658F070A8EC575524645C3B1BE5B51B618E",
+		SecureToken: "f9eac347-0287-4e9a-88f0-bb9cedd30f44",
 		To: "<digitalspiralproject.skmc@gmail.com>",
 		From: "<digitalspiralproject.skmc@gmail.com>",
 		Subject: "<"+document.getElementById('userInfo').value+">",
