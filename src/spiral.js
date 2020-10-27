@@ -560,11 +560,11 @@ function emailResultString() {
 	//Now send the email.
 	Email.send({
 		SecureToken: "f9eac347-0287-4e9a-88f0-bb9cedd30f44",
-		To: "<digitalspiralproject.skmc@gmail.com>",
-		From: "<digitalspiralproject.skmc@gmail.com>",
-		Subject: "<"+document.getElementById('userInfo').value+">",
-		Body: "<"+res+">",
-		}).then(message => console.log('Success.'));
+		To: "digitalspiralproject.skmc@gmail.com",
+		From: "digitalspiralproject.skmc@gmail.com",
+		Subject: document.getElementById('userInfo').value,
+		Body: res,
+		}).then(message => console.log(message)).catch(e => console.log(e));
 }
 
 function getSamplesPerSec() {
