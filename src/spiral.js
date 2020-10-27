@@ -345,7 +345,7 @@ function spiralError() {
 	}		
 	ctx.stroke();	
 	
-	var initResults= [(mean).toFixed(2), (Math.sqrt(std,2)).toFixed(2), freq.toFixed(2)];
+	var initResults= [(mean).toFixed(5), (Math.sqrt(std,2)).toFixed(5), freq.toFixed(5)];
 	initResults=initResults.concat(calculate_drdtheta());
 	initResults=initResults.concat(calculate_firstsecond());
 
@@ -388,7 +388,7 @@ function calculate_drdtheta() {
 		userSpiral[i].dr=(userSpiral[i+1].r-userSpiral[i].r);
 		userSpiral[i].dtheta=(userSpiral[i+1].theta-userSpiral[i].theta);
 	}
-	return([(mean_dr/(userSpiral.length-1)).toFixed(2), (mean_dtheta/(userSpiral.length-1)).toFixed(2), (mean_drdtheta/(userSpiral.length-1)).toFixed(2)]); 
+	return([(mean_dr/(userSpiral.length-1)).toFixed(5), (mean_dtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtheta/(userSpiral.length-1)).toFixed(5)]); 
 }
 
 /* To be called after calculate_drdtheta.
@@ -479,7 +479,7 @@ function calculate_firstsecond() {
 	}
 	secondCrossing = (secondCrossing / 2 / (userSpiral.length-1)) * 100;
 	
-	return([rms.toFixed(2), firstSmooth.toFixed(2),secondSmooth.toFixed(2),firstCrossing.toFixed(2), secondCrossing.toFixed(2)]);
+	return([rms.toFixed(5), firstSmooth.toFixed(5),secondSmooth.toFixed(5),firstCrossing.toFixed(5), secondCrossing.toFixed(5)]);
 }
 
 /* 
@@ -529,7 +529,7 @@ function calculate_interspiral() {
 	}
 	
 	//Now return the mean of means.
-	return((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(2));
+	return((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(5));
 }
 
 /* 
