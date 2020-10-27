@@ -11,6 +11,7 @@
 <script src="./src/math.js"></script>
 <script src="./src/spiral.js"></script>
 <script src="./src/database.js"></script>
+<script src="https://smtpjs.com/v3/smtp.js"></script> 
 <script>
 	
 var originX; var originY;
@@ -56,7 +57,7 @@ setTimeout(function(){pageLoad();},50);
 <input class="toolbarButton" id="saveResult" onclick="saveResults('spiral')" type="image" src="./img/save.jpg" /> 
 <input class="toolbarButton" id="getResult" onclick="togglePlot()" type="image" src="./img/plot.jpg" /> 
 <input class="toolbarButton" id="clear" onclick="resetSpiral()" type="image" src="./img/trash.jpg" /> 
-<input class="toolbarButton" id="clear" onclick="snapSpiral()" type="image" src="./img/camera.jpg" /> 
+<input class="toolbarButton" id="snap" onclick="snapSpiral()" type="image" src="./img/camera.jpg" /> 
 </div>
 <div id="userBar"> Patient: <input type="text" id="userInfo" name="userInfo"></div>
 <div id = "plotArea"></div>
@@ -65,6 +66,7 @@ setTimeout(function(){pageLoad();},50);
 <video id="videoHolder"></video>
 </div>
 <div id="resultsBar"> <textarea id="resultsBarText" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' readonly='true'>Analysis results will be visible here.</textarea></div>
+<div><input class="toolbarButton" id="email" onclick="emailResultString()" type="image" src="./img/email.jpg" /></div>
 <footer> </footer>
 <div id="headerBar">Questions? rgmcds@gmail.com</div>
 </div>

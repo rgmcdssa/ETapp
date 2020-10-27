@@ -1,5 +1,7 @@
 // JavaScript Document
 
+
+
 class spiralPoint {
 
 	constructor(xx,yy,tt) {
@@ -530,11 +532,41 @@ function calculate_interspiral() {
 	return((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(2));
 }
 
-/* Set up string to save the results. 
+/* 
+	Set up string to save the results.  
+	To be called after the results have been analyzed. 
 
-*/ 
-function saveResultsString() {
+	Get the results from the error bar. 
+	Append first the info in the Patient ID bar, 
+	then results, 
+	then the x y of all spiral points.
 	
+	Return: none
+	(send results via email)
+*/ 
+function emailResultString() {
+	var res=document.getElementById('userInfo').value;
+	res += " ";
+	res += document.getElementById('resultsBarText').value; 
+	res += " ";
+	var spirPoints="";
+	for (var i=0; i<userSpiral.length; i++) {
+		spirPoints += userSpiral[i].xpos + " " + userSpiral[i].ypos + " ";
+	}
+	res += spirPoints;
+	
+	alert(res);
+	
+	//Now send the email.
+	Email.send({
+		Host: "smtp.elasticemail.com",
+		Username: "<digitalspiralproject.skmc@gmail.com>",
+		Password: "A658F070A8EC575524645C3B1BE5B51B618E",
+		To: "<digitalspiralproject.skmc@gmail.com>",
+		From: "<digitalspiralproject.skmc@gmail.com>",
+		Subject: "<"+document.getElementById('userInfo').value+">",
+		Body: "<"+res+">",
+		}).then(message => console.log('Success.'));
 }
 
 function getSamplesPerSec() {
@@ -556,7 +588,9 @@ function analyzeSpiral() {
 	analyzed = true;
 	var print = "";
 	var error = spiralError(); 
-	document.getElementById("resultsBarText").value = "Error: " + error[0] + "±" + error[1] + " " + error[2] + "Hz " + "Mean dr: " + error[3] + " Mean dtheta: " + error[4] + " Mean dr/dtheta: " + error[5] + " RMS self: " + error[6] + " 1 Smooth: " + error[7] + " 2 Smooth: " + error[8] + " 1 Crossing: " + error[9] + " 2 Crossing: " + error[10] + "";
+	document.getElementById("resultsBarText").value = "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
+		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + 
+		" RMSself=" + error[6] + " 1S=" + error[7] + " 2S=" + error[8] + " 1X=" + error[9] + " 2X=" + error[10] + "";
 }
 
 //Draw the template spiral that users can trace from. 
