@@ -348,6 +348,7 @@ function spiralError() {
 	var initResults= [(mean).toFixed(5), (Math.sqrt(std,2)).toFixed(5), freq.toFixed(5)];
 	initResults=initResults.concat(calculate_drdtheta());
 	initResults=initResults.concat(calculate_firstsecond());
+	initResults=initResults.concat(calculate_interspiral());
 
 	console.log("Calculated " + initResults.length + " results.");
 	return(initResults);			
@@ -528,8 +529,11 @@ function calculate_interspiral() {
 		}
 	}
 	
-	//Now return the mean of means.
-	return((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(5));
+	//Now get the mean of means.
+	mm=((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(5));
+	//Now calculate the standard deviation. 
+	sd=Math.sqrt(userSpiral.interspiralMeans.reduce((a,b) => a + (b-mm)^2) / userSpiral.interspiralMeans.length).toFixed(5);
+	return([mm,sd]);
 }
 
 /* 
@@ -588,7 +592,8 @@ function analyzeSpiral() {
 	var error = spiralError(); 
 	document.getElementById("resultsBarText").value = "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
 		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + 
-		" RMSself=" + error[6] + " 1S=" + error[7] + " 2S=" + error[8] + " 1X=" + error[9] + " 2X=" + error[10] + "";
+		" RMSself=" + error[6] + " 1S=" + error[7] + " 2S=" + error[8] + " 1X=" + error[9] + " 2X=" + error[10] + "" +
+		" ISI=" + error[11] + "±" + error[12];
 }
 
 //Draw the template spiral that users can trace from. 
