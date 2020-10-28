@@ -301,17 +301,49 @@ function interpolateSpiral() {
 	return(keep);
 }
 
+/* 
+	Main function to calculate all spiral errors.
+	
+	Calculates:
+	- RMSE as root mean square error from target spiral
+	- mean dr, dtheta, dr/dtheta for spiral vs. self as rates of change in coordinates
+	- 1/2S and 1/2X metrics from Pullman
+	- interspiral interval from Louis
+	- tremor frequency...
+
+Return: none
+	(prints results to error bar)
+*/
 var RMSE; 
 function spiralError() {
-	 RMSE=[];	
-	for (ji=0;ji<userSpiral.length;ji++) {
-		RMSE.push(Math.pow(userSpiral[ji].dispFromSpiral(),1));	
+	
+	//Calculate displacement from background ideal spiral, unless not using. 
+	if (drawSpiral.length>0) {
+		RMSE=[];	
+		for (ji=0;ji<userSpiral.length;ji++) {
+			RMSE.push(Math.pow(userSpiral[ji].dispFromSpiral(),1));	
+		}
+		var mean = RMSE.reduce((a,b) => a + b, 0) / RMSE.length;
+		var std = 0;
+		for (ji=0;ji<RMSE.length;ji++) 
+			std = std + Math.pow(RMSE[ji]-mean,2);
+		std = std / RMSE.length;
+	
+		//Draw lines from every point to nearest one on target spiral. 
+		var ctx=document.getElementById("spiralCanvas").getContext("2d");
+    	ctx.strokeStyle="red";
+   		 ctx.globalAlpha=1.0;
+		ctx.beginPath();
+		ctx.moveTo(10,10);
+		for (ji=0;ji<RMSE.length;ji++) {
+			ctx.lineTo(10+ji,10+RMSE[ji]);
+		}		
+		ctx.stroke();
+	
 	}
-	var mean = RMSE.reduce((a,b) => a + b, 0) / RMSE.length;
-	var std = 0;
-	for (ji=0;ji<RMSE.length;ji++) 
-		std = std + Math.pow(RMSE[ji]-mean,2);
-	std = std / RMSE.length;
+	else {
+		var mean=0; var std=0; 
+	}
 	
 	//DUPLICATE CODE (in case taken out). 
 	//Find origin point.
@@ -322,7 +354,7 @@ function spiralError() {
 	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
 	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-xorig,userSpiral[0].xpos-yorig);
 	
-	//Calculate frequency using dft from raw x and y coordinates. 
+	//Calculate frequency using dft from raw polar coordinates. 
 	rads = []; for (var i=0;i<userSpiral.length-1;i++) {
 		rads.push(toComplexNumber(userSpiral[i].r,userSpiral[i].theta));	
 	}
@@ -333,17 +365,7 @@ function spiralError() {
 	var maxMag = mags.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax , 0);
 	var fs=(1000/getSamplesPerSec());
 	fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
-	var freq = fss[maxMag];
-	
-	var ctx=document.getElementById("spiralCanvas").getContext("2d");
-    ctx.strokeStyle="red";
-    ctx.globalAlpha=1.0;
-	ctx.beginPath();
-	ctx.moveTo(10,10);
-	for (ji=0;ji<RMSE.length;ji++) {
-		ctx.lineTo(10+ji,10+RMSE[ji]);
-	}		
-	ctx.stroke();	
+	var freq = fss[maxMag];	
 	
 	var initResults= [(mean).toFixed(5), (Math.sqrt(std,2)).toFixed(5), freq.toFixed(5)];
 	initResults=initResults.concat(calculate_drdtheta());
@@ -372,7 +394,7 @@ function calculate_drdtheta() {
 	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
 	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-xorig,userSpiral[0].xpos-yorig);
 
-	var mean_dr=0; var mean_dtheta=0; var mean_drdtheta =0;
+	var mean_dr=0; var mean_dtheta=0; var mean_drdtheta =0; var mean_drdtime = 0; 
 	for (var i=0; i<(userSpiral.length-1); i++) {
 		
 		//Now calculate r,theta with respect to this point. 
@@ -385,11 +407,13 @@ function calculate_drdtheta() {
 		var temp=(userSpiral[i+1].theta-userSpiral[i].theta); 
 		mean_dtheta += temp;
 		if (temp!=0) { mean_drdtheta += (userSpiral[i+1].r-userSpiral[i].r)/(userSpiral[i+1].theta-userSpiral[i].theta); }
+		temp=(userSpiral[i+1].time-userSpiral[i].time); 
+		if (temp!=0) { mean_drdtime += (userSpiral[i+1].r-userSpiral[i].r)/temp; }
 		
 		userSpiral[i].dr=(userSpiral[i+1].r-userSpiral[i].r);
 		userSpiral[i].dtheta=(userSpiral[i+1].theta-userSpiral[i].theta);
 	}
-	return([(mean_dr/(userSpiral.length-1)).toFixed(5), (mean_dtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtheta/(userSpiral.length-1)).toFixed(5)]); 
+	return([(mean_dr/(userSpiral.length-1)).toFixed(5), (mean_dtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtime/(userSpiral.length-1)).toFixed(5)]); 
 }
 
 /* To be called after calculate_drdtheta.
@@ -596,9 +620,9 @@ function analyzeSpiral() {
 	var print = "";
 	var error = spiralError(); 
 	document.getElementById("resultsBarText").value = "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
-		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + 
-		" RMSself=" + error[6] + " 1S=" + error[7] + " 2S=" + error[8] + " 1X=" + error[9] + "% 2X=" + error[10] + "%" +
-		" ISI=" + error[11] + "±" + error[12];
+		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + " mean_dr/dtime=" + error[6] + 
+		" RMSself=" + error[7] + " 1S=" + error[8] + " 2S=" + error[9] + " 1X=" + error[10] + "% 2X=" + error[11] + "%" +
+		" ISI=" + error[12] + "±" + error[13];
 	document.getElementById("resultsBarText").rows = Math.round(document.getElementById("resultsBarText").value.length/document.getElementById("resultsBarText").cols)/2+1; 
 }
 
