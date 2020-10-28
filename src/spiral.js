@@ -457,7 +457,8 @@ function calculate_firstsecond() {
 		if (userSpiral[i+1].dtheta*userSpiral[i].dtheta!=0) {
 			var a = Math.sign( userSpiral[i+1].dr/userSpiral[i+1].dtheta - rms_drdtheta );
 			var b = Math.sign( userSpiral[i].dr/userSpiral[i].dtheta - rms_drdtheta );
-			firstCrossing += (a-b);
+			/*firstCrossing += (a-b); -- from doc, but think this is wrong; wouldn't accumulate zero crossings but count them against each other*/
+			firstCrossing += (Math.abs(a-b)>1?1:0);
 		}
 	}
 	firstCrossing = (firstCrossing / 2 / (userSpiral.length-1)) * 100;
@@ -478,7 +479,8 @@ function calculate_firstsecond() {
 		var b = userSpiral[i+1].dr/userSpiral[i+1].dtheta - userSpiral[i+2].dr/userSpiral[i+2].dtheta;	
 		a=a/userSpiral[i].dtheta;
 		b=b/userSpiral[i+1].dtheta;
-		secondCrossing += ( Math.sign(a-drms_drdtheta) - Math.sign(b-drms_drdtheta) );
+		//secondCrossing += ( Math.sign(a-drms_drdtheta) - Math.sign(b-drms_drdtheta) );
+		secondCrossing += ( Math.abs(( Math.sign(a-drms_drdtheta) - Math.sign(b-drms_drdtheta) )) > 1 ? 1 : 0);
 		}
 	}
 	secondCrossing = (secondCrossing / 2 / (userSpiral.length-1)) * 100;
@@ -595,9 +597,9 @@ function analyzeSpiral() {
 	var error = spiralError(); 
 	document.getElementById("resultsBarText").value = "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
 		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + 
-		" RMSself=" + error[6] + " 1S=" + error[7] + " 2S=" + error[8] + " 1X=" + error[9] + " 2X=" + error[10] + "" +
+		" RMSself=" + error[6] + " 1S=" + error[7] + " 2S=" + error[8] + " 1X=" + error[9] + "% 2X=" + error[10] + "%" +
 		" ISI=" + error[11] + "±" + error[12];
-	document.getElementById("resultsBarText").rows = Math.round(document.getElementById("resultsBarText").value/document.getElementById("resultsBarText").cols)+1; 
+	document.getElementById("resultsBarText").rows = Math.round(document.getElementById("resultsBarText").value.length/document.getElementById("resultsBarText").cols)/2+1; 
 }
 
 //Draw the template spiral that users can trace from. 
