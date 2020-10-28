@@ -419,7 +419,7 @@ function calculate_firstsecond() {
 	
 	//First calculate the rms value. Will be used for other calculations. 
 	for (var i=0; i<userSpiral.length-1; i++) {
-		rms += userSpiral[i].dr^2; 
+		rms += Math.pow(userSpiral[i].dr,2); 
 		drms += userSpiral[i].dr; 
 	}
 	rms = Math.sqrt((rms/(userSpiral.length-2))); 
@@ -428,7 +428,7 @@ function calculate_firstsecond() {
 	//Now calculate first order smoothness. 
 	for (var i=0; i<userSpiral.length-1; i++) {
 		if (userSpiral[i].dtheta!=0) {
-			firstSmooth += (userSpiral[i].dr/userSpiral[i].dtheta - rms)^2; 
+			firstSmooth = firstSmooth + Math.pow(userSpiral[i].dr/userSpiral[i].dtheta - rms,2); 
 		}
 	}
 	firstSmooth = Math.log(firstSmooth*1/6.28319); // 360 degrees in radians
@@ -437,16 +437,18 @@ function calculate_firstsecond() {
 	for (var i=0; i<userSpiral.length-2; i++) {
 		if (userSpiral[i].dtheta*userSpiral[i+1].dtheta!=0) {
 			var ddrdtheta = userSpiral[i].dr/userSpiral[i].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta; 
-			secondSmooth += (ddrdtheta/userSpiral[i].dtheta - drms)^2;
+			secondSmooth += Math.pow(ddrdtheta/userSpiral[i].dtheta - drms,2);
 		}
 	}
-	secondSmooth = Math.log(secondSmooth^2*1/6.28319);
+	secondSmooth = Math.log(Math.pow(secondSmooth,2)*1/6.28319);
 	
 	//Now calculate first order zero crossing. 
 	//First calculate the root mean square of dr/dtheta.
 	var rms_drdtheta = 0;
-	for (var i=0; i<userSpiral.length; i++) {
-		if (userSpiral[i].dtheta!=0) rms_drdtheta += (userSpiral[i].dr/userSpiral[i].dtheta)^2; 
+	for (var i=0; i<userSpiral.length-1; i++) {
+		if (userSpiral[i].dtheta!=0) {
+			rms_drdtheta += Math.pow(userSpiral[i].dr/userSpiral[i].dtheta,2); 
+		}
 	}
 	rms_drdtheta = Math.sqrt(rms_drdtheta/(userSpiral.length-2));
 	//Then calculate the crossings.
@@ -463,8 +465,9 @@ function calculate_firstsecond() {
 	//Now calculate second order crossing.
 	//First calculate the derivative of rms_drdtheta.
 	var drms_drdtheta = 0;
-	for (var i=0; i<userSpiral.length-1; i++) {
-		if (userSpiral[i].dtheta!=0) drms_drdtheta += (userSpiral[i].dr/userSpiral[i].dtheta); 
+	for (var i=0; i<userSpiral.length-2; i++) {
+		if (userSpiral[i].dtheta!=0) 
+			drms_drdtheta += (userSpiral[i].dr/userSpiral[i].dtheta); 
 	}
 	drms_drdtheta = 0.5 * Math.sqrt( 2*drms_drdtheta / (userSpiral.length-2) ); 
 		
@@ -532,7 +535,7 @@ function calculate_interspiral() {
 	//Now get the mean of means.
 	mm=((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(5));
 	//Now calculate the standard deviation. 
-	sd=Math.sqrt(userSpiral.interspiralMeans.reduce((a,b) => a + (b-mm)^2) / userSpiral.interspiralMeans.length).toFixed(5);
+	sd=Math.sqrt(userSpiral.interspiralMeans.reduce((a,b) => a + Math.pow(b-mm,2)) / userSpiral.interspiralMeans.length).toFixed(5);
 	return([mm,sd]);
 }
 
@@ -594,6 +597,7 @@ function analyzeSpiral() {
 		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + 
 		" RMSself=" + error[6] + " 1S=" + error[7] + " 2S=" + error[8] + " 1X=" + error[9] + " 2X=" + error[10] + "" +
 		" ISI=" + error[11] + "±" + error[12];
+	document.getElementById("resultsBarText").rows = Math.round(document.getElementById("resultsBarText").value/document.getElementById("resultsBarText").cols)+1; 
 }
 
 //Draw the template spiral that users can trace from. 
@@ -635,7 +639,7 @@ function resetSpiral() {
 	userSpiral=[];
 	clearCanvas();
 	drawBGSpiral();
-	document.getElementById("resultsBar").innerHTML = "Error: ";
+	document.getElementById("resultsBar").innerHTML = "Analysis results will be visible here.";
 }
 
 var currentHand = "L";
