@@ -339,7 +339,6 @@ function spiralError() {
 			ctx.lineTo(10+ji,10+RMSE[ji]);
 		}		
 		ctx.stroke();
-	
 	}
 	else {
 		var mean=0; var std=0; 
@@ -356,7 +355,11 @@ function spiralError() {
 	
 	//Calculate frequency using dft from raw polar coordinates. 
 	rads = []; for (var i=0;i<userSpiral.length-1;i++) {
-		rads.push(toComplexNumber(userSpiral[i].r,userSpiral[i].theta));	
+		/*var aa = userSpiral[i].r - userSpiral[i+1].r; 
+		var bb = userSpiral[i].time - userSpiral[i+1].time;
+		if (aa*bb!=0)
+			rads.push(toComplexNumber(aa/bb,aa/bb));	*/
+		rads.push(toComplexNumber(userSpiral[i].r,userSpiral[i].theta));
 	}
 	var dftResult = dft(rads);
 	var mags = [];
@@ -412,6 +415,10 @@ function calculate_drdtheta() {
 		
 		userSpiral[i].dr=(userSpiral[i+1].r-userSpiral[i].r);
 		userSpiral[i].dtheta=(userSpiral[i+1].theta-userSpiral[i].theta);
+		if (temp!=0) 
+			userSpiral[i].drdtime=(userSpiral[i+1].dr)/temp;
+		else
+			userSpiral[i].drdtime=0; 
 	}
 	return([(mean_dr/(userSpiral.length-1)).toFixed(5), (mean_dtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtime/(userSpiral.length-1)).toFixed(5)]); 
 }
@@ -643,7 +650,7 @@ function drawBGSpiral() {
 		ctx.lineTo(x+originX,y+originY);
 	}	
 	ctx.stroke();
-
+	drawSpiral=lhSpiral; 
 }
 
 //Clear the entire canvas by painting a white rectangle over the entire thing. Also clear the arrays that hold the background spirals. 
