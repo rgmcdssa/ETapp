@@ -281,8 +281,8 @@ function calculate_interspiral(decs) {
 	Return: none
 	(send results via email)
 */ 
-function emailResultString() {
-	//First grab result string and store it in res. 
+function procResultStringForEmail() {
+	//Making this so code isnt duplicated.
 	var error = spiralError(5); 
 	
 	var res=document.getElementById('userInfo').value;
@@ -291,6 +291,11 @@ function emailResultString() {
 		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + " mean_dr/dtime=" + error[6] + 
 		" RMSself=" + error[7] + " 1S=" + error[8] + " 2S=" + error[9] + " 1X=" + error[10] + "% 2X=" + error[11] + "%" +
 		" ISI=" + error[12] + "±" + error[13]; 
+	return(res);
+}
+function emailResultString() {
+	//First grab result string and store it in res. 
+	var res = procResultStringForEmail();
 	res += " ";
 	var spirPoints="";
 	for (var i=0; i<userSpiral.length; i++) {

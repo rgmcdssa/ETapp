@@ -19,7 +19,7 @@ function saveResults(targetTest) {
 	let tx=db.transaction(['storage'],'readwrite');
 	let store = tx.objectStore('storage');
 	
-	var result = document.getElementById('resultsBar').innerHTML;
+	var result = procResultStringForEmail(); 
 	result = result.substring(7);
 	var patientInfo = document.getElementById('userInfo').value;
 	
