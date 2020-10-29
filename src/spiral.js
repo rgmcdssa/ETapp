@@ -206,12 +206,28 @@ function drawAnalysisPicture() {
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
 	var cv=document.getElementById("spiralCanvas");
 	var img=new Image();
+	var error = spiralError(2); 
 	img.onload=function() {
 		clearCanvas();
+		//Draw the BG PPT image. 
 		ctx.drawImage(img,0,0,img.width,img.height,0,0,cv.width,cv.height);
+
+		//Now draw the numbers for each value over the text. 
+		ctx.fillStyle="blue";
+		ctx.font='18px serif';
+		ctx.fillText(""+error[3],315,45);
+		ctx.fillText(""+error[4],353,148);
+		ctx.fillText(""+error[5],328,214);
+		ctx.fillText(""+error[6],352,279);
+		
+		ctx.fillText(""+error[12],123,57);
+		
+		ctx.fillText(""+error[8],146,198);
+		ctx.fillText(""+error[9],141,223);
+		ctx.fillText(""+error[10],156,266);
+		ctx.fillText(""+error[11],160,296);
 	};
 	img.src='img/analysis.jpg';
-	flag=true; 
 }
 
 function drawUserSpirals() {

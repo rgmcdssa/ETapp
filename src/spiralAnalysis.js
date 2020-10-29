@@ -12,7 +12,7 @@ Return: none
 	(prints results to error bar)
 */
 var RMSE; 
-function spiralError() {
+function spiralError(decs) {
 	
 	//Calculate displacement from background ideal spiral, unless not using. 
 	if (drawSpiral.length>0) {
@@ -67,10 +67,10 @@ function spiralError() {
 	fss=[]; for (i=0;i<rads.length;i++) fss.push(fs*i/rads.length);
 	var freq = fss[maxMag];	
 	
-	var initResults= [(mean).toFixed(5), (Math.sqrt(std,2)).toFixed(5), freq.toFixed(5)];
-	initResults=initResults.concat(calculate_drdtheta());
-	initResults=initResults.concat(calculate_firstsecond());
-	initResults=initResults.concat(calculate_interspiral());
+	var initResults= [(mean).toFixed(decs), (Math.sqrt(std,2)).toFixed(decs), freq.toFixed(decs)];
+	initResults=initResults.concat(calculate_drdtheta(decs));
+	initResults=initResults.concat(calculate_firstsecond(decs));
+	initResults=initResults.concat(calculate_interspiral(decs));
 
 	console.log("Calculated " + initResults.length + " results.");
 	return(initResults);			
@@ -85,7 +85,7 @@ Mean is calculated at the end.
 
 Return: array with mean dr, dtheta, dr/dtheta
 */ 
-function calculate_drdtheta() {
+function calculate_drdtheta(decs) {
 	//Find origin point.
 	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
 	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
@@ -117,7 +117,7 @@ function calculate_drdtheta() {
 		else
 			userSpiral[i].drdtime=0; 
 	}
-	return([(mean_dr/(userSpiral.length-1)).toFixed(5), (mean_dtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtheta/(userSpiral.length-1)).toFixed(5), (mean_drdtime/(userSpiral.length-1)).toFixed(5)]); 
+	return([(mean_dr/(userSpiral.length-1)).toFixed(decs), (mean_dtheta/(userSpiral.length-1)).toFixed(decs), (mean_drdtheta/(userSpiral.length-1)).toFixed(decs), (mean_drdtime/(userSpiral.length-1)).toFixed(decs)]); 
 }
 
 /* To be called after calculate_drdtheta.
@@ -142,7 +142,7 @@ deriv = 1/2 * ( (2 * sum (dr/dtheta)) / (n-2))^-1/2
 
 Return: array with RMS of r, first smooth, second smooth, first zero-cross, second zero-cross. 
 */
-function calculate_firstsecond() {
+function calculate_firstsecond(decs) {
 	var rms=0; var firstSmooth = 0; var drms = 0; var secondSmooth = 0; 
 	
 	//First calculate the rms value. Will be used for other calculations. 
@@ -213,7 +213,7 @@ function calculate_firstsecond() {
 	}
 	secondCrossing = (secondCrossing / 2 / (userSpiral.length-1)) * 100;
 	
-	return([rms.toFixed(5), firstSmooth.toFixed(5),secondSmooth.toFixed(5),firstCrossing.toFixed(5), secondCrossing.toFixed(5)]);
+	return([rms.toFixed(decs), firstSmooth.toFixed(decs),secondSmooth.toFixed(decs),firstCrossing.toFixed(decs), secondCrossing.toFixed(decs)]);
 }
 
 /* 
@@ -227,7 +227,7 @@ Then take the mean of all of them.
 
 Return: mean interspiral interval. 
 */
-function calculate_interspiral() {
+function calculate_interspiral(decs) {
 	//Set up a map of arrays to keep all unique degree values.
 	var degreeR = new Map();
 	for (var i=0; i<=360; i++) {
@@ -263,9 +263,9 @@ function calculate_interspiral() {
 	}
 	
 	//Now get the mean of means.
-	mm=((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(5));
+	mm=((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(decs));
 	//Now calculate the standard deviation. 
-	sd=Math.sqrt(userSpiral.interspiralMeans.reduce((a,b) => a + Math.pow(b-mm,2)) / userSpiral.interspiralMeans.length).toFixed(5);
+	sd=Math.sqrt(userSpiral.interspiralMeans.reduce((a,b) => a + Math.pow(b-mm,2)) / userSpiral.interspiralMeans.length).toFixed(decs);
 	return([mm,sd]);
 }
 
@@ -282,9 +282,15 @@ function calculate_interspiral() {
 	(send results via email)
 */ 
 function emailResultString() {
+	//First grab result string and store it in res. 
+	var error = spiralError(5); 
+	
 	var res=document.getElementById('userInfo').value;
 	res += " ";
-	res += document.getElementById('resultsBarText').value; 
+	res += "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
+		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + " mean_dr/dtime=" + error[6] + 
+		" RMSself=" + error[7] + " 1S=" + error[8] + " 2S=" + error[9] + " 1X=" + error[10] + "% 2X=" + error[11] + "%" +
+		" ISI=" + error[12] + "±" + error[13]; 
 	res += " ";
 	var spirPoints="";
 	for (var i=0; i<userSpiral.length; i++) {
@@ -322,7 +328,7 @@ function getSamplesPerSec() {
 function analyzeSpiral() {
 	analyzed = true;
 	var print = "";
-	var error = spiralError(); 
+	var error = spiralError(5); 
 	/*document.getElementById("resultsBarText").value = "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
 		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + " mean_dr/dtime=" + error[6] + 
 		" RMSself=" + error[7] + " 1S=" + error[8] + " 2S=" + error[9] + " 1X=" + error[10] + "% 2X=" + error[11] + "%" +
