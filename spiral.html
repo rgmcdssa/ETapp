@@ -10,6 +10,8 @@
 
 <script src="./src/math.js"></script>
 <script src="./src/spiral.js"></script>
+<script src="./src/spiralClass.js"></script>
+<script src="./src/spiralAnalysis.js"></script>
 <script src="./src/database.js"></script>
 <script src="https://smtpjs.com/v3/smtp.js"></script> 
 <script>
@@ -64,10 +66,12 @@ setTimeout(function(){pageLoad();},50);
 <div id="canvasArea">
 <canvas id="spiralCanvas"></canvas>
 <video id="videoHolder"></video>
+<input class="toolbarButton" id="email" onclick="emailResultString()" type="image" src="./img/email.jpg" />
 </div>
-<div><input class="toolbarButton" id="email" onclick="emailResultString()" type="image" src="./img/email.jpg" /></div>
-<div id="resultsBar"> <textarea id="resultsBarText" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' readonly='true'>Analysis results will be visible here.</textarea></div>
-<footer> </footer>
+<!--<div id="resultsBar"> 
+<textarea id="resultsBarText" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' readonly='true'>Analysis results will be visible here.</textarea>
+</div>
+<footer> </footer>-->
 <div id="headerBar">Questions? rgmcds@gmail.com</div>
 </div>
 </body>
