@@ -228,6 +228,8 @@ function drawAnalysisPicture() {
 		ctx.fillText(""+error[11],160,296);
 	};
 	img.src='img/analysis.jpg';
+	flag=false; 
+	analyzing=false; 
 }
 
 function drawUserSpirals() {
@@ -308,7 +310,7 @@ function resetSpiral() {
 	userSpiral=[];
 	clearCanvas();
 	drawBGSpiral();
-	document.getElementById("resultsBar").innerHTML = "Analysis results will be visible here.";
+	//document.getElementById("resultsBar").innerHTML = "Analysis results will be visible here.";
 	flag=true; 
 }
 
