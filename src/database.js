@@ -20,7 +20,7 @@ function saveResults(targetTest) {
 	let store = tx.objectStore('storage');
 	
 	var result = procResultStringForEmail(); 
-	result = result.substring(7);
+	//result = result.substring(7);
 	var patientInfo = document.getElementById('userInfo').value;
 	
 	let item = {patient: patientInfo, text: result, timestamp: Date.now(), hand: currentHand, test: targetTest};
