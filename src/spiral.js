@@ -222,8 +222,8 @@ function drawAnalysisPicture() {
 		
 		ctx.fillText(""+error[12],123,57);
 		
-		ctx.fillText(""+error[8],146,198);
-		ctx.fillText(""+error[9],141,223);
+		ctx.fillText(""+error[8]+"%",146,198);
+		ctx.fillText(""+error[9]+"%",141,223);
 		ctx.fillText(""+error[10],156,266);
 		ctx.fillText(""+error[11],160,296);
 	};
