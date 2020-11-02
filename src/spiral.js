@@ -277,7 +277,22 @@ function drawBGSpiral() {
 	var angleMod = (drawBackgroundSpiral>0?drawBackgroundSpiral:-10)+5; 
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
 	ctx.globalAlpha=0.6;
-	ctx.strokeStyle="lightgrey";
+	ctx.strokeStyle="yellow";
+	ctx.lineWidth=7.0; 
+	ctx.beginPath();	
+	ctx.moveTo(originX,originY);	
+	for (i=0;i<200;i++) {
+		var angle=0.1*i;
+		x=(angleMod*angle)*Math.cos(angle);
+		y=(angleMod*angle)*Math.sin(angle);
+		lhSpiral.push(new spiralPoint(x+originX,y+originY,0));
+		ctx.lineTo(x+originX,y+originY);
+	}	
+	ctx.stroke();
+	
+	ctx.globalAlpha=0.9;
+	ctx.strokeStyle="black";
+	ctx.lineWidth=1.0; 
 	ctx.beginPath();	
 	ctx.moveTo(originX,originY);	
 	for (i=0;i<200;i++) {
