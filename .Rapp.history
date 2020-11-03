@@ -1,0 +1,2 @@
+subj2=read.table('subj2',sep=)
+subj2=read.table('subj2',sep='\t',header=T)

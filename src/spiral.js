@@ -237,8 +237,9 @@ function drawUserSpirals() {
 	if (drawBackgroundSpiral) 
 		drawBGSpiral();
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");	
-	ctx.strokeStyle="black";
+	ctx.fillStyle="blue";
 	ctx.globalAlpha=1.0;
+	ctx.lineWidth=2.0;
 	for (i=1;i<userSpiral.length;i++)
 		userSpiral[i].drawSpiralPoint(userSpiral[i-1]);
 }
@@ -276,9 +277,9 @@ function drawBGSpiral() {
 
 	var angleMod = (drawBackgroundSpiral>0?drawBackgroundSpiral:-10)+5; 
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
-	ctx.globalAlpha=0.6;
-	ctx.strokeStyle="yellow";
-	ctx.lineWidth=7.0; 
+	ctx.globalAlpha=0.2;
+	ctx.strokeStyle="lightorange";
+	ctx.lineWidth=10.0; 
 	ctx.beginPath();	
 	ctx.moveTo(originX,originY);	
 	for (i=0;i<200;i++) {
@@ -290,9 +291,9 @@ function drawBGSpiral() {
 	}	
 	ctx.stroke();
 	
-	ctx.globalAlpha=0.9;
-	ctx.strokeStyle="black";
-	ctx.lineWidth=1.0; 
+	ctx.globalAlpha=0.4;
+	ctx.strokeStyle="orange";
+	ctx.lineWidth=1.5; 
 	ctx.beginPath();	
 	ctx.moveTo(originX,originY);	
 	for (i=0;i<200;i++) {

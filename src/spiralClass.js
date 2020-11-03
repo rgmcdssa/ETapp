@@ -1,7 +1,7 @@
 class spiralPoint {
 
 	constructor(xx,yy,tt) {
-		this.spiralPointColor="black";
+		this.spiralPointColor="#0000FF";
 		this.pointSize=1;
 	
 		this.xpos=xx;
