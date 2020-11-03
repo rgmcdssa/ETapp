@@ -72,7 +72,11 @@ function addTouchPoint(e) {
 	var cv=document.getElementById("spiralCanvas");
 	var bounds=cv.getBoundingClientRect();
 	var d=new Date();
-	userSpiral.push(new spiralPoint(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,d.getTime()));
+	if (!androidCheck())
+		userSpiral.push(new spiralPoint(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,d.getTime()));
+	else 
+		userSpiral.push(new spiralPoint(e.touches[0].pageX-e.target.offsetLeft,e.touches[0].pageY-e.target.offsetTop,d.getTime()));
+
 	flag=true; 
 }
 
@@ -90,6 +94,11 @@ function canvasEvents() {
 document.getElementById("spiralCanvas").addEventListener('touchstart',addTouchPoint,{passive: true});
 document.getElementById("spiralCanvas").addEventListener('touchend',addTouchPoint,{passive: true});
 document.getElementById("spiralCanvas").addEventListener('touchmove',addTouchPoint,{passive: true});
+}
+
+function androidCheck() {
+	var ua=navigator.userAgent.toLowerCase();
+	return( ua.indexOf("android") > -1);
 }
 
 function pageLoad() {
