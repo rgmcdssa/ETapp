@@ -83,7 +83,7 @@ r,theta transform is then done using that calculated point.
 Delta r refers to the change in r from point i to point i+1. 
 Mean is calculated at the end. 
 
-Return: array with mean dr, dtheta, dr/dtheta
+Return: array with mean dr, dtheta, dr/dtheta, dr/dtime, as well as standard deviations
 */ 
 function calculate_drdtheta(decs) {
 	//Find origin point.
@@ -117,7 +117,31 @@ function calculate_drdtheta(decs) {
 		else
 			userSpiral[i].drdtime=0; 
 	}
-	return([(mean_dr/(userSpiral.length-1)).toFixed(decs), (mean_dtheta/(userSpiral.length-1)).toFixed(decs), (mean_drdtheta/(userSpiral.length-1)).toFixed(decs), (mean_drdtime/(userSpiral.length-1)).toFixed(decs)]); 
+
+	var res = ([(mean_dr/(userSpiral.length-1)).toFixed(decs) + "", 
+	(mean_dtheta/(userSpiral.length-1)).toFixed(decs), 
+	(mean_drdtheta/(userSpiral.length-1)).toFixed(decs), 
+	(mean_drdtime/(userSpiral.length-1)).toFixed(decs)]); 
+	
+	var sdev=[0,0,0,0];
+	for (var i=0; i<(userSpiral.length-1); i++) {
+		sdev[0] += Math.pow(userSpiral[i+1].r-userSpiral[i].r-res[0],2);
+		var temp=(userSpiral[i+1].theta-userSpiral[i].theta); 
+		sdev[1] += Math.pow(temp - res[1],2);
+		if (temp!=0)
+			sdev[2] += Math.pow((userSpiral[i+1].r-userSpiral[i].r)/(userSpiral[i+1].theta-userSpiral[i].theta) - res[2],2);
+		temp=(userSpiral[i+1].time-userSpiral[i].time); 
+		if (temp!=0) { sdev[3] += Math.pow((userSpiral[i+1].r-userSpiral[i].r)/temp - res[3],2); }
+	}
+	
+	for (var i=0; i<4; i++)
+		sdev[i] /= (userSpiral.length-1);
+		
+	return ([res[0] + "±" + Math.sqrt(sdev[0]).toFixed(decs),
+		res[1] + "±" + Math.sqrt(sdev[1]).toFixed(decs),
+		res[2] + "±" + Math.sqrt(sdev[2]).toFixed(decs),
+		res[3] + "±" + Math.sqrt(sdev[3]).toFixed(decs),
+	]);
 }
 
 /* To be called after calculate_drdtheta.
