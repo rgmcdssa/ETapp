@@ -8,3 +8,35 @@ length(unique(round(b,3)))
 length(unique(round(b,2)))
 length(unique(round(b,1)))
 length(unique(round(b,2)))
+a=1:20
+b=c(2,7,9)
+a=c(a,7,7,7,9,9,2)
+apply(b,function(x){which(a==x)})
+apply(b,1,function(x){which(a==x)})
+lapply(b,function(x){which(a==x)})
+c(lapply(b,function(x){which(a==x)}))
+melt(lapply(b,function(x){which(a==x)}))
+collapse(lapply(b,function(x){which(a==x)}))
+lcollapse(lapply(b,function(x){which(a==x)}))
+unlist(lapply(b,function(x){which(a==x)})))
+unlist(lapply(b,function(x){which(a==x)}))
+kcent=[]
+km
+subjs=c('subj1','subj2','subj3','subj4','subj5');#
+pdf(('allsubjs.pdf'));#
+kk=matrix(0,length(subjs),6); #
+rownames(kk)=subjs; #
+for (s in subjs) {#
+subj=read.csv(s,header=TRUE,stringsAsFactors=FALSE,sep='\t',colClasses='numeric'); #
+pcaRes <- prcomp((subj),scale. = TRUE); #
+kcent=matrix(0,6,2); #
+for (a in 1:6) { #
+km=kmeans(pcaRes$x[1:5+5*(a-1),1:2],1); kk[s,a]=km$withinss; #
+}#
+colSet = rep(taskCols,each=5); #
+imp=summary(pcaRes)$importance[2,]; #
+plot(pcaRes$x[,1],pcaRes$x[,2],type='p',pch=19,col=colSet,xlab=paste0('PC1: ',imp[1]),ylab=paste0('PC2: ',imp[2]),main=paste0('PCA: ',s,', 6 Sets (n=5 each)')); #
+legend("topright",taskNames,fill=taskCols);#
+}#
+dev.off()
+km

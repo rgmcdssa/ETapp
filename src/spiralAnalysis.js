@@ -327,7 +327,7 @@ function emailResultString() {
 	}
 	res += spirPoints;
 	
-	alert(res);
+	alert('Email sent.');
 	
 	//Now send the email.
 	Email.send({
