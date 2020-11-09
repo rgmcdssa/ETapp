@@ -2,7 +2,7 @@
 /* Body */
 body {
 	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
-	background-color: #999;
+	background-color: #9ba4b4;
 	margin: auto;
 	font-style: normal;
 	font-weight: 200;
@@ -13,7 +13,7 @@ body {
 	width: 400px;
 	margin-left: auto;
 	margin-right: auto;
-	background-color: #FFFFFF;
+	background-color: #fff;
 	display: inline-block; 
 }
 #toolbar {
@@ -23,8 +23,8 @@ body {
 	margin-left: auto;
 	margin-right: auto;
 	background-color: #fff;
-	border-bottom: 1px solid #2C9AB7;
-	border-top: 1px solid #2C9AB7;
+	border-bottom: 1px solid #14274e;
+	border-top: 1px solid #14274e;
 	display: flex;
 	justify-content: center; 
 	align-items: center; 
@@ -35,10 +35,11 @@ body {
 	height: 5%;
 	padding-top: 0%;
 	padding-left: 0%;
-	background-color: #ddd;
+	background-color: #394867;
 	font-weight: bold; 
-	border-bottom: 1px solid #2C9AB7;
-	border-top: 1px solid #2C9AB7;
+	color: #f1f6f9;
+	border-bottom: 1px solid #14274e;
+	border-top: 1px solid #14274e;
 	display: inline-block;
 }
 #resultsBar {
@@ -46,18 +47,20 @@ body {
 	width: 100%;
 	height: 5%;
 	background-color: #fff;
-	border-bottom: 1px solid #2C9AB7;
-	border-top: 1px solid #2C9AB7;
+	border-bottom: 1px solid #14274e;
+	border-top: 1px solid #14274e;
 	align: center; 
 	display: inline-block;
 }
 #userBar {
 	padding-top: 10px;
+	padding-bottom: 10px;
 	width: 100%;
 	height: 5%;
+	font-weight: bold;
 	background-color: #fff;
-	border-bottom: 1px solid #2C9AB7;
-	border-top: 1px solid #2C9AB7;
+	border-bottom: 1px solid #14274e;
+	border-top: 1px solid #14274e;
 	align-items: center; 
 	justify-content: center; 
 	display: inline-block;
@@ -66,8 +69,8 @@ body {
 	border: 1px #0F0 solid;
 }
 #topLeft {
-	border-bottom: 1px solid #2C9AB7;
-	border-right: 1px solid #2C9AB7;
+	border-bottom: 1px solid #14274e;
+	border-right: 1px solid #14274e;
 	width: 45%; 
 	height: 45%;
 	position: relative;
@@ -75,8 +78,8 @@ body {
 	top: 10%;
 }
 #topRight {
-	border-bottom: 1px solid #2C9AB7;
-	border-left: 1px solid #2C9AB7;
+	border-bottom: 1px solid #14274e;
+	border-left: 1px solid #14274e;
 	width: 45%; 
 	height: 45%;
 	position: relative;
@@ -84,8 +87,8 @@ body {
 	top: 10%;
 }
 #bottomLeft {
-	border-top: 1px solid #2C9AB7;
-	border-right: 1px solid #2C9AB7;
+	border-top: 1px solid #14274e;
+	border-right: 1px solid #14274e;
 	width: 45%; 
 	height: 45%;
 	position: relative;
@@ -93,8 +96,8 @@ body {
 	top: 10%;
 }
 #bottomRight {
-	border-top: 1px solid #2C9AB7;
-	border-left: 1px solid #2C9AB7;
+	border-top: 1px solid #14274e;
+	border-left: 1px solid #14274e;
 	width: 45%; 
 	height: 45%;
 	position: relative;
@@ -167,7 +170,7 @@ header {
 	width: 100%;
 	height: 5%;
 	background-color: #ddd;
-	border-bottom: 1px solid #2C9AB7;
+	border-bottom: 1px solid #14274e;
 	display: block;
 }
 .logo {
@@ -207,7 +210,7 @@ ul li a {
 	text-decoration: none;
 }
 ul li:hover a {
-	color: #2C9AB7;
+	color: #14274e;
 }
 .hero_header {
 	color: #FFFFFF;

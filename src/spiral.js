@@ -183,6 +183,8 @@ function intervalWrapper() {
 	
 	if (analyzing) {
 		drawAnalysisPicture(); 
+		document.getElementById("videoHolder").width = 0; 
+		document.getElementById("videoHolder").height = 0; s
 	}
 	else if (!plotting && !snapping) {
 		document.getElementById('plotArea').innerHTML = "";
