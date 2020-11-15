@@ -94,6 +94,7 @@ function canvasEvents() {
 document.getElementById("spiralCanvas").addEventListener('touchstart',addTouchPoint,{passive: true});
 document.getElementById("spiralCanvas").addEventListener('touchend',addTouchPoint,{passive: true});
 document.getElementById("spiralCanvas").addEventListener('touchmove',addTouchPoint,{passive: true});
+document.body.addEventListener('contextmenu',function() { return false; },{passive: true});
 }
 
 function androidCheck() {
