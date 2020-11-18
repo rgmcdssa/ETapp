@@ -73,3 +73,7 @@ class spiralPoint {
 		return(minDist);
 	}	
 };
+
+function procUserSpiral() {
+	
+}

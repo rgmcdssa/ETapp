@@ -185,7 +185,7 @@ function intervalWrapper() {
 	if (analyzing) {
 		drawAnalysisPicture(); 
 		document.getElementById("videoHolder").width = 0; 
-		document.getElementById("videoHolder").height = 0; s
+		document.getElementById("videoHolder").height = 0;
 	}
 	else if (!plotting && !snapping) {
 		document.getElementById('plotArea').innerHTML = "";
@@ -257,6 +257,14 @@ function drawUserSpirals() {
 	ctx.lineWidth=2.0;
 	for (i=1;i<userSpiral.length;i++)
 		userSpiral[i].drawSpiralPoint(userSpiral[i-1]);
+}
+
+function putUserSpiral(inpt) {
+  userSpiral = [];
+  inpt=inpt.split(' ');
+  for (var i=0; i<inpt.length; i+=2) {
+    userSpiral.addTouchPoint()
+  }
 }
 
 function mean_drdt() {

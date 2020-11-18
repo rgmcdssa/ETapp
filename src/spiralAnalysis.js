@@ -48,7 +48,7 @@ function spiralError(decs) {
 	
 	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
 	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
-	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-xorig,userSpiral[0].xpos-yorig);
+	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-yorig,userSpiral[0].xpos-xorig);
 	
 	//Calculate frequency using dft from raw polar coordinates. 
 	rads = []; for (var i=0;i<userSpiral.length-1;i++) {
@@ -92,7 +92,7 @@ function calculate_drdtheta(decs) {
 	
 	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
 	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
-	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-xorig,userSpiral[0].xpos-yorig);
+	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-yorig,userSpiral[0].xpos-xorig);
 
 	var mean_dr=0; var mean_dtheta=0; var mean_drdtheta =0; var mean_drdtime = 0; 
 	for (var i=0; i<(userSpiral.length-1); i++) {
@@ -100,7 +100,7 @@ function calculate_drdtheta(decs) {
 		//Now calculate r,theta with respect to this point. 
 		//Overwrite the existing r,theta.
 		userSpiral[i+1].r=Math.sqrt(Math.pow(userSpiral[i+1].xpos-xorig,2)+Math.pow(userSpiral[i+1].ypos-yorig,2));
-		userSpiral[i+1].theta=Math.atan2(userSpiral[i+1].ypos-xorig,userSpiral[i+1].xpos-yorig);
+		userSpiral[i+1].theta=Math.atan2(userSpiral[i+1].ypos-yorig,userSpiral[i+1].xpos-xorig);
 		
 		//Now find the mean of the difference from i to i+1. 
 		mean_dr += (userSpiral[i+1].r-userSpiral[i].r);
@@ -353,11 +353,16 @@ function getSamplesPerSec() {
 	return(i);
 }
 
+function printConsole(s) {
+	console.log(s.join("\t"));
+}
+
 //Get the results of analysis and place it in the appropriate textbox. 
 function analyzeSpiral() {
 	analyzed = true;
 	var print = "";
 	var error = spiralError(5); 
+	printConsole(error);
 	/*document.getElementById("resultsBarText").value = "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
 		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + " mean_dr/dtime=" + error[6] + 
 		" RMSself=" + error[7] + " 1S=" + error[8] + " 2S=" + error[9] + " 1X=" + error[10] + "% 2X=" + error[11] + "%" +
