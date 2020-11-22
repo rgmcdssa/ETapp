@@ -244,7 +244,6 @@ function drawAnalysisPicture() {
 	};
 	img.src='img/analysis.jpg';
 	flag=false; 
-	analyzing=false; 
 }
 
 function drawUserSpirals() {
