@@ -339,6 +339,7 @@ function clearCanvas() {
 	lhSpiral = [];
 	rhSpiral = [];
 	drawSpiral = [];
+	flag=true; 
 }
 
 //Clear all of the available spiral data, including analysis, and clear the canvas. 
