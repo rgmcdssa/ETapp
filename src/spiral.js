@@ -68,6 +68,10 @@ function drawResults(a) {
 }
 
 function addTouchPoint(e) {
+	if (plotting || analyzing || snapping) {
+		return(false); 
+	}
+	
 	e.preventDefault();
 	var cv=document.getElementById("spiralCanvas");
 	var bounds=cv.getBoundingClientRect();
@@ -340,6 +344,10 @@ function clearCanvas() {
 	rhSpiral = [];
 	drawSpiral = [];
 	flag=true; 
+	
+	analyzing=false;
+	plotting=false;
+	snapping=false; 
 }
 
 //Clear all of the available spiral data, including analysis, and clear the canvas. 
