@@ -359,7 +359,10 @@ function printConsole(s) {
 
 //Get the results of analysis and place it in the appropriate textbox. 
 function analyzeSpiral() {
-	analyzed = true;
+	analyzed = !analyzed;
+	analyzing= !analyzing; 
+	
+	if (analyzed && analyzing) {
 	var print = "";
 	var error = spiralError(5); 
 	printConsole(error);
@@ -368,6 +371,7 @@ function analyzeSpiral() {
 		" RMSself=" + error[7] + " 1S=" + error[8] + " 2S=" + error[9] + " 1X=" + error[10] + "% 2X=" + error[11] + "%" +
 		" ISI=" + error[12] + "±" + error[13];
 	document.getElementById("resultsBarText").rows = Math.round(document.getElementById("resultsBarText").value.length/document.getElementById("resultsBarText").cols)/2+1; */
-	analyzing=true; 
+	}
+	
 	flag=true;
 }

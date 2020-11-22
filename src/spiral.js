@@ -68,9 +68,7 @@ function drawResults(a) {
 }
 
 function addTouchPoint(e) {
-	if (plotting || analyzing || snapping) {
-		return(false); 
-	}
+	if (!plotting && !analyzing && !snapping) {
 	
 	e.preventDefault();
 	var cv=document.getElementById("spiralCanvas");
@@ -82,11 +80,12 @@ function addTouchPoint(e) {
 		userSpiral.push(new spiralPoint(e.touches[0].pageX-e.target.offsetLeft,e.touches[0].pageY-e.target.offsetTop,d.getTime()));
 
 	flag=true; 
+	}
 }
 
 function canvasEvents() {
 	document.getElementById("spiralCanvas").onmousemove = function(e) {
-	if (e.buttons==1){
+	if (e.buttons==1 && !analyzing && !plotting && !snapping){
 		var cv=document.getElementById("spiralCanvas");
 		var bounds=cv.getBoundingClientRect();
 		var d=new Date();
@@ -220,13 +219,16 @@ function intervalWrapper() {
 	flag=false; 
 }
 
+var error = []; 
 function drawAnalysisPicture() {
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
 	var cv=document.getElementById("spiralCanvas");
 	var img=new Image();
-	var error = spiralError(2); 
+	if (flag) {
+		error = spiralError(2); 
+	}
 	img.onload=function() {
-		clearCanvas();
+		clearCanvas(); 
 		//Draw the BG PPT image. 
 		ctx.drawImage(img,0,0,img.width,img.height,0,0,cv.width,cv.height);
 
@@ -245,9 +247,10 @@ function drawAnalysisPicture() {
 		ctx.fillText(""+error[9],141,223);
 		ctx.fillText(""+error[10]+"%",156,266);
 		ctx.fillText(""+error[11]+"%",160,296);
+		
+		flag=false; 
 	};
 	img.src='img/analysis.jpg';
-	flag=false; 
 }
 
 function drawUserSpirals() {
@@ -344,20 +347,21 @@ function clearCanvas() {
 	rhSpiral = [];
 	drawSpiral = [];
 	flag=true; 
-	
-	analyzing=false;
-	plotting=false;
-	snapping=false; 
 }
 
 //Clear all of the available spiral data, including analysis, and clear the canvas. 
 function resetSpiral() {
+	plotting=false;
+	snapping=false; 
 	analyzed = false;
-	userSpiral.length=0;
+	analyzing = false; 
+	for (var i=0;i<userSpiral.length;i++)
+		userSpiral.pop(); 
 	userSpiral=[];
+	for (var i=0; i<error.length; i++)
+		error.pop();
 	clearCanvas();
 	drawBGSpiral();
-	//document.getElementById("resultsBar").innerHTML = "Analysis results will be visible here.";
 	flag=true; 
 }
 
