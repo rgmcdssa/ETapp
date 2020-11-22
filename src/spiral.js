@@ -187,7 +187,7 @@ function intervalWrapper() {
 		document.getElementById("videoHolder").width = 0; 
 		document.getElementById("videoHolder").height = 0;
 	}
-	else if (!plotting && !snapping) {
+	else if (!plotting && !snapping && !analyzing) {
 		document.getElementById('plotArea').innerHTML = "";
 		drawUserSpirals();
 		snapset=false; 
@@ -195,7 +195,7 @@ function intervalWrapper() {
 		document.getElementById("videoHolder").width = 0; 
 		document.getElementById("videoHolder").height = 0; 
 	}
-	else if (snapping && !snapset) {
+	else if (snapping && !snapset && !analyzing) {
 		document.getElementById("spiralCanvas").width=0;
 		document.getElementById("spiralCanvas").height=0;
 		document.getElementById("videoHolder").width = 400; 
@@ -203,7 +203,7 @@ function intervalWrapper() {
 	    document.getElementById("plotArea").innerHTML = setUpSnap();
 	    analyzing=false;
 	}
-	else if (plotting) {
+	else if (plotting && !analyzing) {
 		document.getElementById("videoHolder").width = 0; 
 		document.getElementById("videoHolder").height = 0; 
 		document.getElementById("spiralCanvas").width=400;
