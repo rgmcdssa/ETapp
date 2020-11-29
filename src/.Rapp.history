@@ -40,3 +40,5 @@ legend("topright",taskNames,fill=taskCols);#
 }#
 dev.off()
 km
+ab=read.table('ab',sep=' ' )
+ab=read.table('ab',sep=' ')

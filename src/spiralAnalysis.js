@@ -1,3 +1,23 @@
+/*An implementation of atan that gives degrees as output.
+  Gives degrees 0-90, 90-180, 180-270, 270-360 ascending for quadrants 1-4.
+
+Return: angle of vector in degrees.
+*/
+function atanRotate(x,y) {
+	if (x<0&&y>0) {
+		return(90+Math.atan2(-1*x,y)*180/Math.PI);
+	}
+	else if (x<0&&y<0) {
+		return(180+Math.atan2(-1*y,-1*x)*180/Math.PI);
+	}
+	else if (x>0&&y<0) {
+		return(270+Math.atan2(x,-1*y)*180/Math.PI);
+	}
+	else {
+		return(Math.atan2(y,x)*180/Math.PI); 
+	}
+}
+
 /* 
 	Main function to calculate all spiral errors.
 	
@@ -13,6 +33,7 @@ Return: none
 */
 var RMSE; 
 function spiralError(decs) {
+	toPolarCoordinates(); 
 	
 	//Calculate displacement from background ideal spiral, unless not using. 
 	if (drawSpiral.length>0) {
@@ -40,16 +61,7 @@ function spiralError(decs) {
 	else {
 		var mean=0; var std=0; 
 	}
-	
-	//DUPLICATE CODE (in case taken out). 
-	//Find origin point.
-	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
-	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
-	
-	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
-	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
-	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-yorig,userSpiral[0].xpos-xorig);
-	
+
 	//Calculate frequency using dft from raw polar coordinates. 
 	rads = []; for (var i=0;i<userSpiral.length-1;i++) {
 		/*var aa = userSpiral[i].r - userSpiral[i+1].r; 
@@ -76,6 +88,53 @@ function spiralError(decs) {
 	return(initResults);			
 }
 
+function toRadian(a) {
+	return(a*Math.PI/180);
+}
+function toDegree(a) {
+	return(a*180/Math.PI);
+}
+
+/* Function to get polar coordinates of each spiral point.
+   Do this once.
+   Based on ideal formulas. 
+   Important: theta output in degrees from base function. Convert back to radians prior to storing, to
+   be consistent with original Pullman papers.
+ 
+Input: none - using existing userSpiral.
+Return: none - stored in spiralPoint.
+*/
+function toPolarCoordinates() {
+	//Find origin point.
+	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
+	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
+		
+	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
+	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
+	//Compute theta, but adjust for the preceding point so that theta is always positively increasing. 
+	userSpiral[0].theta=atanRotate(userSpiral[0].ypos-yorig,userSpiral[0].xpos-xorig);
+	
+	//Now do this for all spiral points.
+	var pre=userSpiral[0].theta; 
+	var zeroCrossing = 0; 
+	for (var i=1; i<userSpiral.length;i++) {
+		userSpiral[i].r=Math.sqrt(Math.pow(userSpiral[i].xpos-xorig,2)+Math.pow(userSpiral[i].ypos-yorig,2));
+		
+		var tmp=atanRotate(userSpiral[i].xpos-xorig,userSpiral[i].ypos-yorig)+360*(zeroCrossing-1);
+		if (tmp<pre) {
+			//Hit a point where we cross back over x=1,y=0. Need to add 360 degrees.
+			zeroCrossing++;
+		}
+		userSpiral[i].theta = tmp; 
+		pre=tmp; 
+	}
+	
+	//Now convert back to radians.
+	for (var i=0; i<userSpiral.length; i++) {
+		userSpiral[i].theta=toRadian(userSpiral[i].theta);
+	}
+}
+
 /*
 This function calculates the average change in r, theta, and r/theta.
 The origin is assumed to be the point between the first two points in the original spiral. 
@@ -86,21 +145,10 @@ Mean is calculated at the end.
 Return: array with mean dr, dtheta, dr/dtheta, dr/dtime, as well as standard deviations
 */ 
 function calculate_drdtheta(decs) {
-	//Find origin point.
-	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
-	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
-	
-	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
-	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
-	userSpiral[0].theta=Math.atan2(userSpiral[0].ypos-yorig,userSpiral[0].xpos-xorig);
 
+	var pre=-10000; 
 	var mean_dr=0; var mean_dtheta=0; var mean_drdtheta =0; var mean_drdtime = 0; 
 	for (var i=0; i<(userSpiral.length-1); i++) {
-		
-		//Now calculate r,theta with respect to this point. 
-		//Overwrite the existing r,theta.
-		userSpiral[i+1].r=Math.sqrt(Math.pow(userSpiral[i+1].xpos-xorig,2)+Math.pow(userSpiral[i+1].ypos-yorig,2));
-		userSpiral[i+1].theta=Math.atan2(userSpiral[i+1].ypos-yorig,userSpiral[i+1].xpos-xorig);
 		
 		//Now find the mean of the difference from i to i+1. 
 		mean_dr += (userSpiral[i+1].r-userSpiral[i].r);
@@ -183,16 +231,16 @@ function calculate_firstsecond(decs) {
 			firstSmooth = firstSmooth + Math.pow(userSpiral[i].dr/userSpiral[i].dtheta - rms,2); 
 		}
 	}
-	firstSmooth = Math.log(firstSmooth*1/6.28319); // 360 degrees in radians
+	firstSmooth = Math.log(firstSmooth*1/360);//6.28319); // 360 degrees in radians
 	
 	//Now calculate second order smoothness. 
 	for (var i=0; i<userSpiral.length-2; i++) {
 		if (userSpiral[i].dtheta*userSpiral[i+1].dtheta!=0) {
-			var ddrdtheta = userSpiral[i].dr/userSpiral[i].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta; 
+			var ddrdtheta = userSpiral[i+1].dr/userSpiral[i+1].dtheta - userSpiral[i].dr/userSpiral[i].dtheta; 
 			secondSmooth += Math.pow(ddrdtheta/userSpiral[i].dtheta - drms,2);
 		}
 	}
-	secondSmooth = Math.log(Math.pow(secondSmooth,2)*1/6.28319);
+	secondSmooth = Math.log(Math.pow(secondSmooth,2)*1/360);//6.28319);
 	
 	//Now calculate first order zero crossing. 
 	//First calculate the root mean square of dr/dtheta.
@@ -203,6 +251,7 @@ function calculate_firstsecond(decs) {
 		}
 	}
 	rms_drdtheta = Math.sqrt(rms_drdtheta/(userSpiral.length-2));
+	
 	//Then calculate the crossings.
 	var firstCrossing = 0; 
 	for (var i=0; i<userSpiral.length-2; i++) {
@@ -220,7 +269,8 @@ function calculate_firstsecond(decs) {
 	var drms_drdtheta = 0;
 	for (var i=0; i<userSpiral.length-2; i++) {
 		if (userSpiral[i].dtheta!=0) 
-			drms_drdtheta += (userSpiral[i].dr/userSpiral[i].dtheta); 
+			drms_drdtheta += Math.abs(userSpiral[i].dr/userSpiral[i].dtheta); 
+			//fix error where negative changes in angle affect results
 	}
 	drms_drdtheta = 0.5 * Math.sqrt( 2*drms_drdtheta / (userSpiral.length-2) ); 
 		
@@ -261,28 +311,27 @@ function calculate_interspiral(decs) {
 	for (var i=0; i<userSpiral.length;i++) {
 		//Convert theta from radian to degree.
 		var res=0; 
-		//Fix it so that anything in the quandrants below x-axis are + PI.
+		//Fix it so that anything in the quadrants below x-axis are + PI.
 		if (userSpiral[i].theta<0) {
 			res=(Math.PI+userSpiral[i].theta)+Math.PI; 
 		}
 		else { 
 			res=userSpiral[i].theta;
 		}
-		res = Math.round( res * 180 / Math.PI);
+		//Because this is a linear transform, mod theta so we can convert back to 0 to 360 degrees. 
+		res = Math.round(((Math.abs(res) %(Math.PI*2)) * 180 / Math.PI));
 		degreeR[res].push(userSpiral[i].r);	
 	}
 	
 	//Now loop through entire map and gather interspiral interval values;
+	//Implement this value as std dev / mean per Louis 2012. 
 	userSpiral.interspiralMeans = []; 
 	for (var k in degreeR) {
-		var mean=0; var count=0; 
-		if (degreeR[k].length>1) {
-			for (var j=0; j<degreeR[k].length-1;j++) {
-				mean+=degreeR[k][j+1]-degreeR[k][j];
-			}
-			count=count+1;	
-			mean=mean/count; 
-			userSpiral.interspiralMeans.push(mean);
+		var mean=0; var stdev=0; var count=0; 
+		if (degreeR[k].length>0) {
+			mean=(degreeR[k].reduce((a, b) => a + b) / degreeR[k].length);
+			stdev = Math.sqrt(degreeR[k].reduce((a, b) => a + Math.pow(b-mean,2)) / degreeR[k].length);
+			if (mean!=0) { userSpiral.interspiralMeans.push(stdev/mean); } 
 		}
 	}
 	
@@ -290,6 +339,7 @@ function calculate_interspiral(decs) {
 	mm=((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(decs));
 	//Now calculate the standard deviation. 
 	sd=Math.sqrt(userSpiral.interspiralMeans.reduce((a,b) => a + Math.pow(b-mm,2)) / userSpiral.interspiralMeans.length).toFixed(decs);
+	console.log(mm+" "+sd);
 	return([mm,sd]);
 }
 
