@@ -235,13 +235,13 @@ function drawAnalysisPicture() {
 		//Now draw the numbers for each value over the text. 
 		ctx.fillStyle="blue";
 		ctx.font='12px serif';
-		ctx.fillText(""+error[3],311,45);
-		ctx.fillText(""+error[4],349,148);
-		ctx.fillText(""+error[5],324,214);
+		ctx.fillText(""+error[3],311,25);
+		ctx.fillText(""+error[4],349,133);
+		ctx.fillText(""+error[5],324,207);
 		ctx.fillText(""+error[6],348,279);
 		
 		ctx.font='18px serif';
-		ctx.fillText(""+error[12],123,57);
+		ctx.fillText(""+error[12]+"±"+error[13],123,40);
 		
 		ctx.fillText(""+error[8],146,198);
 		ctx.fillText(""+error[9],141,223);

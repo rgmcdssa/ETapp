@@ -257,7 +257,7 @@ function calculate_firstsecond(decs) {
 	for (var i=0; i<userSpiral.length-2; i++) {
 		if (userSpiral[i+1].dtheta*userSpiral[i].dtheta!=0) {
 			var a = Math.sign( userSpiral[i+1].dr/userSpiral[i+1].dtheta - rms_drdtheta );
-			var b = Math.sign( userSpiral[i].dr/userSpiral[i].dtheta - rms_drdtheta );
+			var b = Math.sign( userSpiral[i].dr/userSpiral[i].dtheta- rms_drdtheta );
 			/*firstCrossing += (a-b); -- from doc, but think this is wrong; wouldn't accumulate zero crossings but count them against each other*/
 			firstCrossing += (Math.abs(a-b)>1?1:0);
 		}
@@ -277,11 +277,10 @@ function calculate_firstsecond(decs) {
 	var secondCrossing = 0; 
 	for (var i=0; i<userSpiral.length-3; i++) {
 		if (userSpiral[i].dtheta*userSpiral[i+1].dtheta*userSpiral[i+2].dtheta!=0) {
-		var a = userSpiral[i].dr/userSpiral[i].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta;
-		var b = userSpiral[i+1].dr/userSpiral[i+1].dtheta - userSpiral[i+2].dr/userSpiral[i+2].dtheta;	
+		var a = userSpiral[i+1].dr/userSpiral[i+1].dtheta - userSpiral[i].dr/userSpiral[i].dtheta;
+		var b = userSpiral[i+2].dr/userSpiral[i+2].dtheta - userSpiral[i+1].dr/userSpiral[i+1].dtheta;	
 		a=a/userSpiral[i].dtheta;
 		b=b/userSpiral[i+1].dtheta;
-		//secondCrossing += ( Math.sign(a-drms_drdtheta) - Math.sign(b-drms_drdtheta) );
 		secondCrossing += ( Math.abs(( Math.sign(a-drms_drdtheta) - Math.sign(b-drms_drdtheta) )) > 1 ? 1 : 0);
 		}
 	}
@@ -416,11 +415,6 @@ function analyzeSpiral() {
 	var print = "";
 	var error = spiralError(5); 
 	printConsole(error);
-	/*document.getElementById("resultsBarText").value = "RMS=" + error[0] + "±" + error[1] + " " + error[2] + " Hz=" + 
-		" mean_dr=" + error[3] + " mean_theta=" + error[4] + " mean_dr/dtheta=" + error[5] + " mean_dr/dtime=" + error[6] + 
-		" RMSself=" + error[7] + " 1S=" + error[8] + " 2S=" + error[9] + " 1X=" + error[10] + "% 2X=" + error[11] + "%" +
-		" ISI=" + error[12] + "±" + error[13];
-	document.getElementById("resultsBarText").rows = Math.round(document.getElementById("resultsBarText").value.length/document.getElementById("resultsBarText").cols)/2+1; */
 	}
 	
 	flag=true;
