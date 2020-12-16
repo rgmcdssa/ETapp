@@ -68,34 +68,34 @@ function calculateSelfDistances(a) {
     var toKeep = [3,5,7,11,12,13,14,15,16,17];
     var dists = [];
     var out = [];
-    var center = []; var minc=1000000; 
+    var center = 0; var minc=1000000; 
     var pt = document.getElementById("userInfo").value; 
-    for (var i=0; i<toKeep.length;i++) { center.push(0); }
+    //for (var i=0; i<toKeep.length;i++) { center.push(0); }
     for (i=0; i<a.length; i++) {
       if (a[i].patient == pt || pt == "") {
         var tmp=[];
-        //for (var j=0; j<toKeep.length; j++) {
-        //    tmp.push(parseFloat(a[i].text[toKeep[j]])); 
+        for (var j=0; j<toKeep.length; j++) {
+            tmp.push(parseFloat(a[i].text[toKeep[j]])); 
         //   center[j] = center[j] + tmp[tmp.length-1];
-        //}    
+        }    
         //Use best spiral as center instead. 
-        if (checkLearnedSpiral(tmp) < minc) { minc = checkLearnedSpiral(tmp); center = tmp; }
         dists.push(tmp);
+        if (checkLearnedSpiral(a[i].text) < minc) { minc = checkLearnedSpiral(a[i].text); center = i; }
       }
     }
-    for (i=0; i<toKeep.length;i++) { center[i] = center[i]/a.length; }
+    //for (i=0; i<toKeep.length;i++) { dists[center][i] = dists[center][i]/a.length; }
     var c=0; 
     for (i=0; i<a.length; i++) {
       if (a[i].patient == pt || pt == "") {
-        out.push(euclidDist(dists[c++],center).toFixed(2));}
+        out.push(euclidDist(dists[c++],dists[center]).toFixed(2));}
       else {
         out.push(1000000);
       }
     }
-    var m = Math.min(...out); 
-    for (i=0; i<a.length; i++) {
-      out[i]=(out[i]/m).toFixed(2); 
-    }
+    //var m = Math.min(...out); 
+    //for (i=0; i<a.length; i++) {
+    //  out[i]=(out[i]/m).toFixed(2); 
+    //}
     return(out);
 }
 
