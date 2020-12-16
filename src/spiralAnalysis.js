@@ -32,7 +32,7 @@ Return: none
 	(prints results to error bar)
 */
 var RMSE; 
-function spiralError(decs) {
+function spiralError(decs,printable=1) {
 	toPolarCoordinates(); 
 	
 	//Calculate displacement from background ideal spiral, unless not using. 
@@ -85,6 +85,11 @@ function spiralError(decs) {
 	initResults=initResults.concat(calculate_interspiral(decs));
 
 	console.log("Calculated " + initResults.length + " results.");
+	if (!printable) {
+	  initResults = initResults.reduce((a,i)=> a + " " + i);
+	  initResults = initResults.replace(/±/g," ");
+	  initResults = initResults.split(" ");
+	}
 	return(initResults);			
 }
 
@@ -406,6 +411,36 @@ function printConsole(s) {
 	console.log(s.join("\t"));
 }
 
+// calculate Euclidean distance between vectors
+// d = sqrt( sum( a-b^2 ) )
+function euclidDist(a,b) {
+  var diff=(a.map((a,i) => (a-b[i])*(a-b[i])));
+  return(Math.sqrt(diff.reduce((acc,v) => acc + v)));
+}
+
+var learnedSpirals = [];
+//Check spiral metrics vs. simulated noise. 
+function checkLearnedSpiral(arg) {
+  
+  //get rid of time and other non-keep values
+  var toKeep = [3,5,7,11,12,13,14,15,16,17];
+  var inpt = [];
+  for (var i=0; i<toKeep.length; i++) {
+    inpt.push(arg[toKeep[i]]);
+  }
+
+  var mind=1000000; var mini=0; var d=0; 
+  //Find closest center of noise spirals. 
+  for (var i=1; i<learnedSpirals[drawBackgroundSpiral].length; i++) {
+    d=euclidDist(inpt,learnedSpirals[drawBackgroundSpiral][i]);
+    if (d<mind) { mind=d; mini=i; }
+  }
+
+  //Now get distance to non-noise spirals.
+  var d = euclidDist(inpt,learnedSpirals[drawBackgroundSpiral][0]);
+  return((d/mind).toFixed(2));
+}
+
 //Get the results of analysis and place it in the appropriate textbox. 
 function analyzeSpiral() {
 	analyzed = !analyzed;
@@ -413,8 +448,10 @@ function analyzeSpiral() {
 	
 	if (analyzed && analyzing) {
 	var print = "";
-	var error = spiralError(5); 
+	var error = spiralError(5,0); 
+	var abnormalChance = checkLearnedSpiral(error);
 	printConsole(error);
+	printConsole(['Chance spiral is abnormal = ',abnormalChance]);
 	}
 	
 	flag=true;

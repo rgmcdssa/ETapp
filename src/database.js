@@ -19,7 +19,7 @@ function saveResults(targetTest) {
 	let tx=db.transaction(['storage'],'readwrite');
 	let store = tx.objectStore('storage');
 	
-	var result = procResultStringForEmail(); 
+	var result =spiralError(5,0); 
 	//result = result.substring(7);
 	var patientInfo = document.getElementById('userInfo').value;
 	
@@ -62,9 +62,43 @@ function procDate(a) {
 	return((a.getMonth()+1)+"/"+a.getDate()+"/"+(a.getYear()+1900)+" "+hours+":"+minutes+label);
 }
 
+//Find the center of the error cluster and then calculate how far each point is from it.
+//Not the most elegant solution, but necessary without vector operations. 
+function calculateSelfDistances(a) {
+    var toKeep = [3,5,7,11,12,13,14,15,16,17];
+    var dists = [];
+    var out = [];
+    var center = []; 
+    var pt = document.getElementById("userInfo").value; 
+    for (var i=0; i<toKeep.length;i++) { center.push(0); }
+    for (i=0; i<a.length; i++) {
+      if (a[i].patient == pt || pt == "") {
+        var tmp=[];
+        for (var j=0; j<toKeep.length; j++) {
+            tmp.push(parseFloat(a[i].text[toKeep[j]])); 
+           center[j] = center[j] + tmp[tmp.length-1];
+        }    
+        dists.push(tmp);
+      }
+    }
+    for (i=0; i<toKeep.length;i++) { center[i] = center[i]/a.length; }
+    var c=0; 
+    for (i=0; i<a.length; i++) {
+      if (a[i].patient == pt || pt == "") {
+        out.push(euclidDist(dists[c++],center).toFixed(2));}
+      else {
+        out.push(0);
+      }
+    }
+    
+    return(out);
+}
+
 function plotResults(a,targetTest) {
 	resultStore = a;
 	document.getElementById("plotArea").innerHTML = "";
+  
+  var selfs = calculateSelfDistances(resultStore); 
 
 	var tbl = document.createElement('table');
 	var tblBody = document.createElement('tbody');
@@ -75,12 +109,14 @@ function plotResults(a,targetTest) {
 	var h2 = document.createElement('th');
 	var h3 = document.createElement('th');
 	var h4 = document.createElement('th');
+	var h5 = document.createElement('th');
 	
 	h1.appendChild(document.createTextNode('Patient'));
 	h2.appendChild(document.createTextNode('Date'));
-	h3.appendChild(document.createTextNode('Error'));
-	h4.appendChild(document.createTextNode('Hand'));
-	h.appendChild(h1); h.appendChild(h2); h.appendChild(h3); h.appendChild(h4);
+	h3.appendChild(document.createTextNode('Hand'));
+	h4.appendChild(document.createTextNode('Error Ratio'));
+	h5.appendChild(document.createTextNode('Distance from Self'));
+	h.appendChild(h1); h.appendChild(h2); h.appendChild(h3); h.appendChild(h4); h.appendChild(h5);
 	tblBody.appendChild(h);
 	
 	for (i=0; i<resultStore.length; i++) {
@@ -96,18 +132,23 @@ function plotResults(a,targetTest) {
 		var c2=document.createElement('td');
 		var c3=document.createElement('td');
 		var c4=document.createElement('td');
+		var c5=document.createElement('td');
 		
-		c3.appendChild(document.createTextNode(resultStore[i].patient));
-		row.appendChild(c3);
+		c1.appendChild(document.createTextNode(resultStore[i].patient));
+		row.appendChild(c1);
 		
 		c2.appendChild(document.createTextNode(procDate(new Date(resultStore[i].timestamp))));
 		row.appendChild(c2);
 		
-		c1.appendChild(document.createTextNode(resultStore[i].text));
-		row.appendChild(c1);
+		c3.appendChild(document.createTextNode(resultStore[i].hand));
+		row.appendChild(c3);
 		
-		c4.appendChild(document.createTextNode(resultStore[i].hand));
+		c4.appendChild(document.createTextNode(checkLearnedSpiral(resultStore[i].text)));
 		row.appendChild(c4);
+		
+		c5.appendChild(document.createTextNode(selfs[i]));
+		row.appendChild(c5);
+		
 		tblBody.appendChild(row);
 	}
 		 
