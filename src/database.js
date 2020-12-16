@@ -87,10 +87,13 @@ function calculateSelfDistances(a) {
       if (a[i].patient == pt || pt == "") {
         out.push(euclidDist(dists[c++],center).toFixed(2));}
       else {
-        out.push(0);
+        out.push(1000000);
       }
     }
-    
+    var m = Math.min(...out); 
+    for (i=0; i<a.length; i++) {
+      out[i]=(out[i]/m).toFixed(2); 
+    }
     return(out);
 }
 
