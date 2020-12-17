@@ -234,11 +234,10 @@ function drawAnalysisPicture() {
 		//Draw the BG PPT image. 
 		ctx.drawImage(img,0,0,img.width,img.height,0,0,cv.width,cv.height);
 
-    ctx.fillStyle = "black";
-    if (chance<=1) { ctx.fillStyle="green"; } else if (chance>1.2) { ctx.fillStyle="red"; }
-    ctx.font='16px serif';
-    ctx.fontWeight="bold";
-		ctx.fillText("Chance spiral is abnormal = " + chance,5,15);
+    var c = "black";
+    if (chance<=1) { c="green"; } else if (chance>1.2) { c="red"; }
+		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance; 
+		document.getElementById("chanceInfo").style.color = c;
 
 		//Now draw the numbers for each value over the text. 
 		ctx.fillStyle="blue";
@@ -351,6 +350,7 @@ function clearCanvas() {
 	ctx.fillStyle="white";
 	ctx.globalAlpha=1.0; 
 	ctx.fillRect(0,0,cv.width,cv.height);
+	document.getElementById("chanceInfo").innerHTML = "";
 	lhSpiral = [];
 	rhSpiral = [];
 	drawSpiral = [];
