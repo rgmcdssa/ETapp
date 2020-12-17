@@ -418,7 +418,6 @@ function euclidDist(a,b) {
   return(Math.sqrt(diff.reduce((acc,v) => acc + v)));
 }
 
-var learnedSpirals = [];
 //Check spiral metrics vs. simulated noise. 
 function checkLearnedSpiral(arg) {
   
@@ -426,18 +425,26 @@ function checkLearnedSpiral(arg) {
   var toKeep = [3,5,7,11,12,13,14,15,16,17];
   var inpt = [];
   for (var i=0; i<toKeep.length; i++) {
-    inpt.push(arg[toKeep[i]]);
+    inpt.push(arg[toKeep[i]]); 
   }
 
-  var mind=1000000; var mini=0; var d=0; 
+  var mind=1000000;var d=0; var check=[];
   //Find closest center of noise spirals. 
   for (var i=1; i<learnedSpirals[drawBackgroundSpiral].length; i++) {
-    d=euclidDist(inpt,learnedSpirals[drawBackgroundSpiral][i]);
-    if (d<mind) { mind=d; mini=i; }
+    while (check.length > 0) { check.pop(); }
+    for (var j=0; j<toKeep.length; j++) {
+      check.push(learnedSpirals[drawBackgroundSpiral][i][toKeep[j]]); 
+    }
+    d=euclidDist(inpt,check);
+    if (d<mind) { mind=d;}
   }
 
+  var nn = [];
+  for (var i=0; i<toKeep.length; i++) {
+    nn.push(learnedSpirals[drawBackgroundSpiral][0][toKeep[i]]); 
+  }
   //Now get distance to non-noise spirals.
-  var d = euclidDist(inpt,learnedSpirals[drawBackgroundSpiral][0]);
+  var d = euclidDist(inpt,nn);
   return((d/mind).toFixed(2));
 }
 
