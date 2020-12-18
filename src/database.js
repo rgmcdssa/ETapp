@@ -62,6 +62,18 @@ function procDate(a) {
 	return((a.getMonth()+1)+"/"+a.getDate()+"/"+(a.getYear()+1900)+" "+hours+":"+minutes+label);
 }
 
+function arrayMean(arg) { 
+  var mean=0; 
+  for (var i=0; i<arg.length; i++) {
+    mean += parseFloat(arg[i]);
+  }
+  return((mean/arg.length).toFixed(2));
+}
+
+function firstLast(arg) {
+  return(arg[0]+"-"+arg[arg.length-1]);
+}
+
 //Find the center of the error cluster and then calculate how far each point is from it.
 //Not the most elegant solution, but necessary without vector operations. 
 function calculateSelfDistances(a) {
@@ -80,7 +92,7 @@ function calculateSelfDistances(a) {
         }    
         //Use best spiral as center instead. 
         dists.push(tmp);
-        if (checkLearnedSpiral(a[i].text) < minc) { minc = checkLearnedSpiral(a[i].text); center = i; }
+        if (arrayMean(checkLearnedSpiral(a[i].text)) < minc) { minc = arrayMean(checkLearnedSpiral(a[i].text)); center = i; }
       }
     }
     //for (i=0; i<toKeep.length;i++) { dists[center][i] = dists[center][i]/a.length; }
@@ -163,7 +175,7 @@ function plotResults(a,targetTest) {
 		c3.appendChild(document.createTextNode(resultStore[i].hand));
 		row.appendChild(c3);
 		
-		c4.appendChild(document.createTextNode(checkLearnedSpiral(resultStore[i].text)));
+		c4.appendChild(document.createTextNode(firstLast(checkLearnedSpiral(resultStore[i].text))));
 		row.appendChild(c4);
 		
 		c5.appendChild(document.createTextNode(selfs[i]));

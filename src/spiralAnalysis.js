@@ -448,13 +448,8 @@ function checkLearnedSpiral(arg) {
   var d = euclidDist(inpt,nn);
   minds.push((d/mind).toFixed(2));
   }
-  mind=0;
-  for (i=0;i<minds.length; i++) {
-    mind += parseFloat(minds[i]); 
-  }
-  console.log(minds.sort());
-  mind /= minds.length; 
-  return(mind.toFixed(2));
+  
+  return(minds.sort());
 }
 
 //Get the results of analysis and place it in the appropriate textbox. 
