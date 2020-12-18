@@ -428,12 +428,13 @@ function checkLearnedSpiral(arg) {
     inpt.push(arg[toKeep[i]]); 
   }
 
-  var mind=1000000;var d=0; var check=[];
+  var mind=1000000;var d=0; var check=[]; var minds = []; 
   //Find closest center of noise spirals. 
-  for (var i=1; i<learnedSpirals[drawBackgroundSpiral].length; i++) {
+  for (var bg=0; bg<6; bg++) {
+  for (var i=1; i<learnedSpirals[bg].length; i++) {
     while (check.length > 0) { check.pop(); }
     for (var j=0; j<toKeep.length; j++) {
-      check.push(learnedSpirals[drawBackgroundSpiral][i][toKeep[j]]); 
+      check.push(learnedSpirals[bg][i][toKeep[j]]); 
     }
     d=euclidDist(inpt,check);
     if (d<mind) { mind=d;}
@@ -441,11 +442,19 @@ function checkLearnedSpiral(arg) {
 
   var nn = [];
   for (var i=0; i<toKeep.length; i++) {
-    nn.push(learnedSpirals[drawBackgroundSpiral][0][toKeep[i]]); 
+    nn.push(learnedSpirals[bg][0][toKeep[i]]); 
   }
   //Now get distance to non-noise spirals.
   var d = euclidDist(inpt,nn);
-  return((d/mind).toFixed(2));
+  minds.push((d/mind).toFixed(2));
+  }
+  mind=0;
+  for (i=0;i<minds.length; i++) {
+    mind += parseFloat(minds[i]); 
+  }
+  console.log(minds.sort());
+  mind /= minds.length; 
+  return(mind.toFixed(2));
 }
 
 //Get the results of analysis and place it in the appropriate textbox. 
