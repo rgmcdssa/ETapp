@@ -107,6 +107,8 @@ function calculateSelfDistances(a) {
     mean /= m.length; 
     for (i=0; i<dists.length; i++) { sd = (m[i]-mean)^2; }
     sd = Math.sqrt(sd / m.length);
+    alert(m);
+    alert(mean);
     var c=0; 
     for (i=0; i<a.length; i++) {
       if (i == center) {
@@ -114,7 +116,8 @@ function calculateSelfDistances(a) {
       }
       else if (a[i].patient == pt || pt == "") {
         if (sd == 0) { out.push(0); }
-        out.push((m[c++]-mean/sd).toFixed(2));}
+        //out.push((m[c++]-mean/sd).toFixed(2));}
+        out.push(m[c++]); }
       else {
         out.push(1000000);
       }
