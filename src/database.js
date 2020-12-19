@@ -113,6 +113,7 @@ function calculateSelfDistances(a) {
         out.push(0);
       }
       else if (a[i].patient == pt || pt == "") {
+        if (sd == 0) { out.push(0); }
         out.push((m[c++]-mean/sd).toFixed(2));}
       else {
         out.push(1000000);
