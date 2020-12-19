@@ -99,7 +99,9 @@ function calculateSelfDistances(a) {
     //Calculate mean, sd so we can do z scores. 
     var m = []; var mean = 0; var sd = 0;
     for (i=0; i<dists.length; i++) {
-        if (i!=center) { m.push(euclidDist(dists[i],dists[center]).toFixed(2)); }
+        //if (i!=center) { m.push(euclidDist(dists[i],dists[center]).toFixed(2)); }
+        //Use mean of ratios instead of actual calculated distances.
+        if (i!=center) { m.push((arrayMean(checkLearnedSpiral(a[i].text))/arrayMean(checkLearnedSpiral(a[center].text))).toFixed(2)); }
         mean += parseFloat(m[m.length-1]);
     }  
     mean /= m.length; 
