@@ -235,8 +235,8 @@ function drawAnalysisPicture() {
 		ctx.drawImage(img,0,0,img.width,img.height,0,0,cv.width,cv.height);
 
     var c = "black";
-    if (arrayMean(chance)<=1) { c="green"; } else if (arrayMean(chance)>1.2) { c="red"; }
-		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance[0] + "-" + chance[5]; 
+    if (chance[0]<=1) { c="green"; } else if (chance[0]>1.2) { c="red"; }
+		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance[0] + "-" + chance[4]; 
 		document.getElementById("chanceInfo").style.color = c;
 
 		//Now draw the numbers for each value over the text. 

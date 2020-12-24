@@ -425,12 +425,12 @@ function checkLearnedSpiral(arg) {
   var toKeep = [3,5,7,11,12,13,14,15,16,17];
   var inpt = [];
   for (var i=0; i<toKeep.length; i++) {
-    inpt.push(arg[toKeep[i]]); 
+    inpt.push((arg[toKeep[i]])); 
   }
 
   var mind=1000000;var d=0; var check=[]; var minds = []; 
   //Find closest center of noise spirals. 
-  for (var bg=0; bg<6; bg++) {
+  for (var bg=0; bg<learnedSpirals.length; bg++) {
   for (var i=1; i<learnedSpirals[bg].length; i++) {
     while (check.length > 0) { check.pop(); }
     for (var j=0; j<toKeep.length; j++) {
@@ -442,7 +442,7 @@ function checkLearnedSpiral(arg) {
 
   var nn = [];
   for (var i=0; i<toKeep.length; i++) {
-    nn.push(learnedSpirals[bg][0][toKeep[i]]); 
+    nn.push((learnedSpirals[bg][0][toKeep[i]])); 
   }
   //Now get distance to non-noise spirals.
   var d = euclidDist(inpt,nn);
