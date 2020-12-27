@@ -422,7 +422,7 @@ function euclidDist(a,b) {
 function checkLearnedSpiral(arg) {
   
   //get rid of time and other non-keep values
-  var toKeep = [3,5,7,11,12,13,14,15,16,17];
+  var toKeep = [3,5,7,9,10,11,12,13,14,15,16,17];
   var inpt = [];
   for (var i=0; i<toKeep.length; i++) {
     inpt.push((arg[toKeep[i]])); 
