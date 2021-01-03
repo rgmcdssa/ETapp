@@ -235,7 +235,7 @@ function drawAnalysisPicture() {
 		ctx.drawImage(img,0,0,img.width,img.height,0,0,cv.width,cv.height);
 
     var c = "black";
-    if (chance[2]<=1) { c="green"; } else if (chance[0]>1.1) { c="red"; }
+    if (chance[0]<=1 && chance[4]<1.1) { c="green"; } else if (chance[0]>1.1 || chance[1]>1.1) { c="red"; }
 		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance[0] + "-" + chance[4]; 
 		document.getElementById("chanceInfo").style.color = c;
 

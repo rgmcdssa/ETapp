@@ -84,7 +84,7 @@ function spiralError(decs,printable=1) {
 	initResults=initResults.concat(calculate_firstsecond(decs));
 	initResults=initResults.concat(calculate_interspiral(decs));
 
-	console.log("Calculated " + initResults.length + " results.");
+	//console.log("Calculated " + initResults.length + " results.");
 	if (!printable) {
 	  initResults = initResults.reduce((a,i)=> a + " " + i);
 	  initResults = initResults.replace(/±/g," ");
@@ -343,7 +343,7 @@ function calculate_interspiral(decs) {
 	mm=((userSpiral.interspiralMeans.reduce((a, b) => a + b) / userSpiral.interspiralMeans.length).toFixed(decs));
 	//Now calculate the standard deviation. 
 	sd=Math.sqrt(userSpiral.interspiralMeans.reduce((a,b) => a + Math.pow(b-mm,2)) / userSpiral.interspiralMeans.length).toFixed(decs);
-	console.log(mm+" "+sd);
+	//console.log(mm+" "+sd);
 	return([mm,sd]);
 }
 
@@ -453,6 +453,14 @@ function checkLearnedSpiral(arg) {
 
 //Get the results of analysis and place it in the appropriate textbox. 
 function analyzeSpiral() {
+  
+  //Trim the last few points from the spiral, to avoid artifacts related to slowing as the 
+	//task finishes or lifting their finger off the page too slowly.
+	//Arbitrarily chose 5. 
+	for (var i=0; i<5; i++) {
+	  userSpiral.pop(); 
+	}
+  
 	analyzed = !analyzed;
 	analyzing= !analyzing; 
 	
@@ -460,8 +468,8 @@ function analyzeSpiral() {
 	var print = "";
 	var error = spiralError(5,0); 
 	var abnormalChance = checkLearnedSpiral(error);
-	printConsole(error);
-	printConsole(['Chance spiral is abnormal = ',abnormalChance]);
+	//printConsole(error);
+	//printConsole(['Chance spiral is abnormal = ',abnormalChance]);
 	}
 	
 	flag=true;
