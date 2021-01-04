@@ -421,32 +421,23 @@ function euclidDist(a,b) {
 //Check spiral metrics vs. simulated noise. 
 function checkLearnedSpiral(arg) {
   
-  //get rid of time and other non-keep values
+  //Get rid of standard deviations basically. 
   var toKeep = [3,5,7,9,11,12,13,14,15,16,17];
-  var inpt = [];
-  for (var i=0; i<toKeep.length; i++) {
-    inpt.push((arg[toKeep[i]])); 
-  }
 
-  var mind=1000000;var d=0; var check=[]; var minds = []; 
+  var check=[]; var minds = []; 
   //Find closest center of noise spirals. 
   for (var bg=0; bg<learnedSpirals.length; bg++) {
+  var mind=0; var d=0; 
+  //Distance to control center. 
+  var ctrl=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[bg][0][k]));
   for (var i=1; i<learnedSpirals[bg].length; i++) {
-    while (check.length > 0) { check.pop(); }
-    for (var j=0; j<toKeep.length; j++) {
-      check.push(learnedSpirals[bg][i][toKeep[j]]); 
-    }
-    d=euclidDist(inpt,check);
-    if (d<mind) { mind=d;}
+    //Distance to noise center. 
+    d=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[bg][i][k]));
+    //Keep the minimum difference between control and noise. 
+    if ((ctrl/d)>mind) { mind=(ctrl/d);}
   }
 
-  var nn = [];
-  for (var i=0; i<toKeep.length; i++) {
-    nn.push((learnedSpirals[bg][0][toKeep[i]])); 
-  }
-  //Now get distance to non-noise spirals.
-  var d = euclidDist(inpt,nn);
-  minds.push((d/mind).toFixed(2));
+  minds.push(mind.toFixed(2));
   }
   return(minds.sort(function(a, b){return a-b}));
 }
