@@ -222,6 +222,7 @@ function intervalWrapper() {
 
 var error = []; 
 function drawAnalysisPicture() {
+  var upper = 2;
 	var ctx=document.getElementById("spiralCanvas").getContext("2d");
 	var cv=document.getElementById("spiralCanvas");
 	var img=new Image();
@@ -235,8 +236,8 @@ function drawAnalysisPicture() {
 		ctx.drawImage(img,0,0,img.width,img.height,0,0,cv.width,cv.height);
 
     var c = "black";
-    if (chance[0]<=1 && chance[4]<1.1) { c="green"; } else if (chance[0]>1.1 || chance[1]>1.1) { c="red"; }
-		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance[0] + "-" + chance[4]; 
+    if ((chance[0]<=1 && chance[upper]<1.1) || chance.reduce((a,b)=>a+b)/(upper+1) < 1.1) { c="green"; } else if (chance[0]>1.1 || chance[1]>1.1) { c="red"; }
+		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance[0] + "-" + chance[upper]; 
 		document.getElementById("chanceInfo").style.color = c;
 
 		//Now draw the numbers for each value over the text. 

@@ -32,7 +32,7 @@ Return: none
 	(prints results to error bar)
 */
 var RMSE; 
-function spiralError(decs,printable=1) {
+function spiralError(decs,printable=1,extended=0) {
 	toPolarCoordinates(); 
 	
 	//Calculate displacement from background ideal spiral, unless not using. 
@@ -90,6 +90,12 @@ function spiralError(decs,printable=1) {
 	  initResults = initResults.replace(/±/g," ");
 	  initResults = initResults.split(" ");
 	}
+	
+	//If extending, add newer metrics.
+	if (extended) {
+	  initResults=initResults.concat(calculate_accel(decs));
+	}
+	
 	return(initResults);			
 }
 
@@ -195,6 +201,28 @@ function calculate_drdtheta(decs) {
 		res[2] + "±" + Math.sqrt(sdev[2]).toFixed(decs),
 		res[3] + "±" + Math.sqrt(sdev[3]).toFixed(decs),
 	]);
+}
+
+/* Calculate the acceleration, or rate of change of the velocity.
+   Basically calculate dr / dt, then calculate the rate of change of that. */
+function calculate_accel(decs) {
+    var drdt = []; var tmp = 0;
+  	for (var i=0; i<(userSpiral.length-1); i++) {
+  	  tmp = (userSpiral[i+1].time-userSpiral[i].time);
+  	  if (tmp<1) { tmp =1; }
+  	  drdt.push((userSpiral[i+1].r-userSpiral[i].r) / tmp);
+  	}
+  	
+  	var mean_ddrddt = 0; var sd_ddrddt = 0;
+  	for (var i=0; i<drdt.length-1; i++) {
+  	  mean_ddrddt += (drdt[i+1] - drdt[i]);
+  	}
+  	mean_ddrddt=mean_ddrddt/drdt.length;
+  	for (var i=0; i<drdt.length-1; i++) {
+  	  sd_ddrddt += Math.pow(((drdt[i+1] - drdt[i]) - mean_ddrddt),2);
+  	}
+  	sd_ddrddt = Math.sqrt(sd_ddrddt/drdt.length); 
+  	return([mean_ddrddt.toFixed(decs),sd_ddrddt.toFixed(decs)]);
 }
 
 /* To be called after calculate_drdtheta.
@@ -418,27 +446,49 @@ function euclidDist(a,b) {
   return(Math.sqrt(diff.reduce((acc,v) => acc + v)));
 }
 
+// calculate Euclidean distance between vectors, BUT normalize to target vector first
+// d = sqrt( sum( a-b^2 ) )
+function euclidDistNorm(a,b) {
+  var diff=(a.map((a,i) => (a/b[i])));
+  diff=(diff.map((a,i) => (1-a)*(1-a)));
+  return(Math.sqrt(diff.reduce((acc,v) => acc + v)));
+}
+
 //Check spiral metrics vs. simulated noise. 
-function checkLearnedSpiral(arg) {
+function checkLearnedSpiral(arg,extended=0) {
   
   //Get rid of standard deviations basically. 
+  var forControl = [3,11]; 
   var toKeep = [3,5,7,9,11,12,13,14,15,16,17];
-
-  var check=[]; var minds = []; 
-  //Find closest center of noise spirals. 
+  if (extended==1) { toKeep=toKeep.concat([18,19]);console.log("extended"); }
+  var ctrls=[]; var s=[]; var mindi=[]; var minInds = [];
   for (var bg=0; bg<learnedSpirals.length; bg++) {
-  var mind=0; var d=0; 
-  //Distance to control center. 
-  var ctrl=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[bg][0][k]));
-  for (var i=1; i<learnedSpirals[bg].length; i++) {
-    //Distance to noise center. 
-    d=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[bg][i][k]));
-    //Keep the minimum difference between control and noise. 
-    if ((ctrl/d)>mind) { mind=(ctrl/d);}
+    ctrl=(euclidDist(forControl.map(k => arg[k]),forControl.map(k => learnedSpirals[bg][0][k])));
+    ctrls.push(ctrl);
+    s.push(ctrl);
+  }
+  s.sort(function(a, b){return a-b});
+  var minInds = []; 
+  for (var i=0; i<3; i++) {
+    minInds.push(ctrls.indexOf(s[i]));
   }
 
-  minds.push(mind.toFixed(2));
+  var check=[]; var minds = []; var ds=[];  
+  for (var bg=0; bg<minInds.length; bg++) {
+  ctrl=(euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][0][k])));
+  var mind=1000000; var d=0; var mi=-1; 
+  //Distance to control center. 
+  for (var i=1; i<learnedSpirals[minInds[bg]].length; i++) {
+    //Distance to noise center. 
+    d=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][i][k]));
+    //Keep the minimum difference between control and noise. 
+    ds.push(d);
+    if (d<mind) { mind=d; mi=i;}
   }
+  mindi.push(mi);
+  minds.push((ctrl/mind).toFixed(2));
+  }
+  
   return(minds.sort(function(a, b){return a-b}));
 }
 
@@ -457,10 +507,9 @@ function analyzeSpiral() {
 	
 	if (analyzed && analyzing) {
 	var print = "";
-	var error = spiralError(5,0); 
-	var abnormalChance = checkLearnedSpiral(error);
 	//printConsole(error);
-	//printConsole(['Chance spiral is abnormal = ',abnormalChance]);
+	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(5,0))]);
+	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(5,0,1),1)]);
 	}
 	
 	flag=true;
