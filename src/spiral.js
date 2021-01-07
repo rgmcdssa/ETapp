@@ -236,7 +236,9 @@ function drawAnalysisPicture() {
 		ctx.drawImage(img,0,0,img.width,img.height,0,0,cv.width,cv.height);
 
     var c = "black";
-    if ((chance[0]<=1 && chance[upper]<1.1) || chance.reduce((a,b)=>a+b)/(upper+1) < 1.1) { c="green"; } else if (chance[0]>1.1 || chance[1]>1.1) { c="red"; }
+    if ((chance[0]<=1 && chance[upper]<1.1)) { c="green"; } 
+    else if (chance.reduce((a,b)=>parseFloat(a)+parseFloat(b))/(chance.length) < 1.1) { c="green"; } 
+    else if (chance[0]>1.1 || chance[1]>1.1) { c="red"; }
 		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance[0] + "-" + chance[upper]; 
 		document.getElementById("chanceInfo").style.color = c;
 
@@ -319,29 +321,36 @@ function drawBGSpiral() {
 	ctx.lineWidth=10.0; 
 	ctx.beginPath();	
 	ctx.moveTo(originX,originY);	
+	if (newBackgroundSpiral) {
+	for (var i=0; i<lhSpiral.length; i++) { 
+	  lhSpiral.pop(); drawSpiral.pop(); 
+	}
+	}
 	for (i=0;i<200;i++) {
 		var angle=0.1*i;
 		x=(angleMod*angle)*Math.cos(angle);
 		y=(angleMod*angle)*Math.sin(angle);
-		lhSpiral.push(new spiralPoint(x+originX,y+originY,0));
+		if (newBackgroundSpiral) { 
+		  lhSpiral.push(new spiralPoint(x+originX,y+originY,2000/(200-i)));
+	  	drawSpiral.push(new spiralPoint(x+originX,y+originY,2000/(200-i)));
+		}
 		ctx.lineTo(x+originX,y+originY);
-	}	
+	}
 	ctx.stroke();
 	
 	ctx.globalAlpha=0.4;
 	ctx.strokeStyle="orange";
 	ctx.lineWidth=1.5; 
 	ctx.beginPath();	
-	ctx.moveTo(originX,originY);	
+	ctx.moveTo(originX,originY);
 	for (i=0;i<200;i++) {
-		var angle=0.1*i;
+	  var angle=0.1*i;
 		x=(angleMod*angle)*Math.cos(angle);
 		y=(angleMod*angle)*Math.sin(angle);
-		lhSpiral.push(new spiralPoint(x+originX,y+originY,0));
 		ctx.lineTo(x+originX,y+originY);
 	}	
 	ctx.stroke();
-	drawSpiral=lhSpiral; 
+	newBackgroundSpiral = 0;
 }
 
 //Clear the entire canvas by painting a white rectangle over the entire thing. Also clear the arrays that hold the background spirals. 
@@ -352,9 +361,9 @@ function clearCanvas() {
 	ctx.globalAlpha=1.0; 
 	ctx.fillRect(0,0,cv.width,cv.height);
 	document.getElementById("chanceInfo").innerHTML = "";
-	lhSpiral = [];
-	rhSpiral = [];
-	drawSpiral = [];
+	for (var i=0; i<lhSpiral.length; i++) {
+	  lhSpiral.pop(); rhSpiral.pop(); 
+	}
 	flag=true; 
 }
 
@@ -386,14 +395,21 @@ function handleButton() {
 	}
 }
 
-function toggleSpiral() {
+var newBackgroundSpiral = 0;
+async function toggleSpiral() {
+  newBackgroundSpiral = 1;
 	drawBackgroundSpiral++;
+	
 	if (drawBackgroundSpiral > 5) {
 		drawBackgroundSpiral = 0; 
+		newBackgroundSpiral = 0; 
+		for (var i=0; i<drawSpiral.length; i++) {
+		  drawSpiral.pop(); 
+		}
 	}
 
-	clearCanvas();
-	drawBGSpiral();
+	await clearCanvas();
+	await drawBGSpiral();
 	snapset=false; 
 	snapping=false;
 	flag=true; 

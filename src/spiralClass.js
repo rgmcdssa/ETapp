@@ -54,8 +54,6 @@ class spiralPoint {
 	}
 	
 	dispFromSpiral() {
-		if (currentSpiral == 0) { drawSpiral = lhSpiral; }
-		else if (currentSpiral == 2) { drawSpiral = lhSpiral; }
 		var minDist=1000000;var mini=0;
 		var ctx=document.getElementById("spiralCanvas").getContext("2d");
 		ctx.strokeStyle="red";
