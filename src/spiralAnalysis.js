@@ -458,9 +458,8 @@ function euclidDistNorm(a,b) {
 function checkLearnedSpiral(arg,extended=0) {
   
   //Get rid of standard deviations basically. 
-  //var forControl = [3,11];
   var forControl = [3,5,7,9,11,12,13,14,15,16,17];
-  var toKeep = [0,1,3,5,7,9,11,12,13,14,15,16,17];
+  var toKeep = [3,5,7,9,11,12,13,14,15,16,17];
   if (extended==1) { toKeep=toKeep.concat([18,19]);console.log("extended"); }
   var ctrls=[]; var s=[]; var mindi=[]; var minInds = [];
   for (var bg=0; bg<learnedSpirals.length; bg++) {
