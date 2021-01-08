@@ -1,6 +1,7 @@
 var learnedSpirals = [];
 
-var num=15; 
+var num=10; 
+var skip=5; 
 var num2=5;
 
 // n=2000 15 types, level 3 and 5, noiseJump 3, only 18 values
@@ -19,10 +20,10 @@ function makeLearnedSpirals() {
 var l = learn.split(";");
 var l2 = learn2.split(";");
 
-for (var i=0; i<(l.length-1)/num; i++) {
+for (var i=0; i<(l.length-1)/(num+skip); i++) {
   learnedSpirals.push([]);
   for (var j=0; j<num; j++) {
-    learnedSpirals[i].push(l[j+(i)*num].split(","));
+    learnedSpirals[i].push(l[j+(i)*(num+skip)].split(","));
   }
 }
 /*for (var i=0; i<(l2.length-1)/num2; i++) {

@@ -454,33 +454,43 @@ function euclidDistNorm(a,b) {
   return(Math.sqrt(diff.reduce((acc,v) => acc + v)));
 }
 
+// calculate Euclidean distance between vectors, BUT weight values first
+// d = sqrt( sum( a-b^2 ) )
+function euclidDistWeight(a,b,c) {
+  var a1=(a.map((a,i) => (a*c[i])));
+  var b1=(b.map((b,i) => (b*c[i])));
+  var diff=(a1.map((a1,i) => (a1-b1[i])*(a1-b1[i])));
+  return(Math.sqrt(diff.reduce((acc,v) => acc + v)));
+}
+
 //Check spiral metrics vs. simulated noise. 
 function checkLearnedSpiral(arg,extended=0) {
   
   //Get rid of standard deviations basically. 
-  var forControl = [3,5,7,9,11,12,13,14,15,16,17];
-  var toKeep = [3,5,7,9,11,12,13,14,15,16,17];
+  var forControl = [3,11];
+  var toKeep = [0,1,3,5,7,9,11,12,13,14,15,16,17];
+  var weightVector = [1,1,1,1,1,1,1,1,1,1,1,1,1,100000,100000];
   if (extended==1) { toKeep=toKeep.concat([18,19]);console.log("extended"); }
   var ctrls=[]; var s=[]; var mindi=[]; var minInds = [];
   for (var bg=0; bg<learnedSpirals.length; bg++) {
-    ctrl=(euclidDist(forControl.map(k => arg[k]),forControl.map(k => learnedSpirals[bg][0][k])));
+    ctrl=(euclidDist(forControl.map(k => arg[k]),forControl.map(k => learnedSpirals[bg][0][k]),weightVector));
     ctrls.push(ctrl);
     s.push(ctrl);
   }
   s.sort(function(a, b){return a-b});
   var minInds = []; 
-  for (var i=0; i<3; i++) {
+  for (var i=0; i<5; i++) {
     minInds.push(ctrls.indexOf(s[i]));
   }
 
   var check=[]; var minds = []; var ds=[];  
   for (var bg=0; bg<minInds.length; bg++) {
-  ctrl=(euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][0][k])));
+  ctrl=(euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][0][k]),weightVector));
   var mind=1000000; var d=0; var mi=-1; 
   //Distance to control center. 
   for (var i=1; i<learnedSpirals[minInds[bg]].length; i++) {
     //Distance to noise center. 
-    d=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][i][k]));
+    d=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][i][k]),weightVector);
     //Keep the minimum difference between control and noise. 
     ds.push(d);
     if (d<mind) { mind=d; mi=i;}
@@ -488,6 +498,12 @@ function checkLearnedSpiral(arg,extended=0) {
   mindi.push(mi);
   minds.push((ctrl/mind).toFixed(2));
   }
+  /*var minds=[];
+  ctrl=(euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[0]][0][k]),weightVector));
+  for (var i=1; i<learnedSpirals[minInds[0]].length; i++) {
+    d=euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[0]][i][k]),weightVector);
+    minds.push((ctrl/d).toFixed(2));
+  }*/
   
   return(minds.sort(function(a, b){return a-b}));
 }
@@ -508,8 +524,8 @@ function analyzeSpiral() {
 	if (analyzed && analyzing) {
 	var print = "";
 	//printConsole(error);
-	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(5,0))]);
-	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(5,0,1),1)]);
+	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(10,0))]);
+	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(10,0,1),1)]);
 	}
 	
 	flag=true;

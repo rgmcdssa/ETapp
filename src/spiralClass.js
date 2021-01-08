@@ -1,12 +1,15 @@
 class spiralPoint {
 
-	constructor(xx,yy,tt) {
+	constructor(xx,yy,tt,ii) {
 		this.spiralPointColor="#0000FF";
 		this.pointSize=1;
 	
 		this.xpos=xx;
 		this.ypos=yy;
 		this.time=tt;
+		
+		this.index = ii; 
+		this.targetIndex = -1; 
 	
 		var offsetX = 0; var offsetY = 0;
 		if (currentSpiral == 0) { offsetX = originX; offsetY = originY; }
@@ -59,13 +62,18 @@ class spiralPoint {
 		ctx.strokeStyle="red";
 		ctx.beginPath();
 		ctx.moveTo(this.xpos,this.ypos);
-		for (i=0;i<200;i++) {
+		//Start looking for a matching point only above the index of the point found previously. 
+		var start = 0;
+		//if (this.index > 0) { start = userSpiral[this.index-1].targetIndex+1; } 
+		//if (start == 200) { start = 199; }
+		for (i=start;i<200;i++) {
 			var cDist=this.euclidDistance(drawSpiral[i]);
 			if (cDist<minDist) {
 				minDist=cDist;	
 				mini=i;
 			}
 		}	
+		this.targetIndex = mini; 
 		ctx.lineTo(drawSpiral[mini].xpos,drawSpiral[mini].ypos);
 		ctx.stroke();	
 		return(minDist);

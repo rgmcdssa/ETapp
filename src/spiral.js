@@ -75,9 +75,9 @@ function addTouchPoint(e) {
 	var bounds=cv.getBoundingClientRect();
 	var d=new Date();
 	if (!androidCheck())
-		userSpiral.push(new spiralPoint(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,d.getTime()));
+		userSpiral.push(new spiralPoint(e.pageX-e.target.offsetLeft,e.pageY-e.target.offsetTop,d.getTime(),userSpiral.length));
 	else 
-		userSpiral.push(new spiralPoint(e.touches[0].pageX-e.target.offsetLeft,e.touches[0].pageY-e.target.offsetTop,d.getTime()));
+		userSpiral.push(new spiralPoint(e.touches[0].pageX-e.target.offsetLeft,e.touches[0].pageY-e.target.offsetTop,d.getTime(),userSpiral.length));
 
 	flag=true; 
 	}
@@ -89,7 +89,7 @@ function canvasEvents() {
 		var cv=document.getElementById("spiralCanvas");
 		var bounds=cv.getBoundingClientRect();
 		var d=new Date();
-		userSpiral.push(new spiralPoint(e.offsetX,e.offsetY,d.getTime()));
+		userSpiral.push(new spiralPoint(e.offsetX,e.offsetY,d.getTime(),userSpiral.length));
 		flag=true;
 	}
 }
@@ -144,7 +144,7 @@ function pictureSpiral(img) {
 		if (img.data[i]*img.data[i+1]*img.data[i+2]==0) {
 			var x=(i*img.width);
 			var y=(i/img.width);
-			userSpiral.push(new spiralPoint(x,y,time));
+			userSpiral.push(new spiralPoint(x,y,time,userSpiral.length));
 			time+=20; 
 		}
 	}
@@ -228,7 +228,7 @@ function drawAnalysisPicture() {
 	var img=new Image();
 	if (flag) {
 		error = spiralError(2); 
-		chance = checkLearnedSpiral(spiralError(5,0)); 
+		chance = checkLearnedSpiral(spiralError(15,0)); 
 	}
 	img.onload=function() {
 		clearCanvas(); 
