@@ -33,10 +33,13 @@ Return: none
 */
 var RMSE; 
 function spiralError(decs,printable=1,extended=0) {
-	toPolarCoordinates(); 
+	//Handle conversion to r,theta coordinates once. 
+	toPolarCoordinates(userSpiral); 
+	if (drawSpiral.length>0) { toPolarCoordinates(drawSpiral); }
 
 	//Calculate displacement from background ideal spiral, unless not using. 
-	if (drawSpiral.length>0) {
+	//Do this using the linear graph of r vs. theta. 
+	if (drawSpiral.length>0 && drawBackgroundSpiral>0) {
 		RMSE=[];	
 		for (ji=0;ji<userSpiral.length;ji++) {
 			RMSE.push(Math.pow(userSpiral[ji].dispFromSpiral(),1));	
@@ -115,34 +118,34 @@ function toDegree(a) {
 Input: none - using existing userSpiral.
 Return: none - stored in spiralPoint.
 */
-function toPolarCoordinates() {
+function toPolarCoordinates(inpt) {
 	//Find origin point.
-	var xorig=(userSpiral[0].xpos+userSpiral[1].xpos)/2;
-	var yorig=(userSpiral[0].ypos+userSpiral[1].ypos)/2;
+	var xorig=(inpt[0].xpos+inpt[1].xpos)/2;
+	var yorig=(inpt[0].ypos+inpt[1].ypos)/2;
 		
 	//First reset the original point. We have done all of the reference spiral calculations at this point, so safe. 
-	userSpiral[0].r=Math.sqrt(Math.pow(userSpiral[0].xpos-xorig,2)+Math.pow(userSpiral[0].ypos-yorig,2));
+	inpt[0].r=Math.sqrt(Math.pow(inpt[0].xpos-xorig,2)+Math.pow(inpt[0].ypos-yorig,2));
 	//Compute theta, but adjust for the preceding point so that theta is always positively increasing. 
-	userSpiral[0].theta=atanRotate(userSpiral[0].ypos-yorig,userSpiral[0].xpos-xorig);
+	inpt[0].theta=atanRotate(inpt[0].ypos-yorig,inpt[0].xpos-xorig);
 	
 	//Now do this for all spiral points.
-	var pre=userSpiral[0].theta; 
+	var pre=inpt[0].theta; 
 	var zeroCrossing = 0; 
-	for (var i=1; i<userSpiral.length;i++) {
-		userSpiral[i].r=Math.sqrt(Math.pow(userSpiral[i].xpos-xorig,2)+Math.pow(userSpiral[i].ypos-yorig,2));
+	for (var i=1; i<inpt.length;i++) {
+		inpt[i].r=Math.sqrt(Math.pow(inpt[i].xpos-xorig,2)+Math.pow(inpt[i].ypos-yorig,2));
 		
-		var tmp=atanRotate(userSpiral[i].xpos-xorig,userSpiral[i].ypos-yorig)+360*(zeroCrossing-1);
+		var tmp=atanRotate(inpt[i].xpos-xorig,inpt[i].ypos-yorig)+360*(zeroCrossing-1);
 		if (tmp<pre) {
 			//Hit a point where we cross back over x=1,y=0. Need to add 360 degrees.
 			zeroCrossing++;
 		}
-		userSpiral[i].theta = tmp; 
+		inpt[i].theta = tmp; 
 		pre=tmp; 
 	}
 	
 	//Now convert back to radians.
-	for (var i=0; i<userSpiral.length; i++) {
-		userSpiral[i].theta=toRadian(userSpiral[i].theta);
+	for (var i=0; i<inpt.length; i++) {
+		inpt[i].theta=toRadian(inpt[i].theta);
 	}
 }
 
@@ -223,6 +226,20 @@ function calculate_accel(decs) {
   	}
   	sd_ddrddt = Math.sqrt(sd_ddrddt/drdt.length); 
   	return([mean_ddrddt.toFixed(decs),sd_ddrddt.toFixed(decs)]);
+}
+
+//New AUC function. 
+function calculate_auc() {
+  //Calculate slope of line r vs. index
+  var slope = (userSpiral[userSpiral.length-1].r - userSpiral[0].r);
+  slope = slope / userSpiral.length;
+  
+  var auc = 0;
+  for (var i=0; i<userSpiral.length; i++) {
+    auc += Math.abs(userSpiral[i].r - (userSpiral[0].r+slope));
+  }
+  
+  return(auc);
 }
 
 /* To be called after calculate_drdtheta.

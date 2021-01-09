@@ -77,7 +77,19 @@ class spiralPoint {
 		ctx.lineTo(drawSpiral[mini].xpos,drawSpiral[mini].ypos);
 		ctx.stroke();	
 		return(minDist);
-	}	
+		/*//First find the closest point by angle to this userSpiral. 
+		var minAngle = 1000000; var mini = -1; 
+		for (var i=0; i<drawSpiral.length; i++) {
+		    if (drawSpiral[i].theta-this.theta < minAngle) {
+		        minAngle = drawSpiral[i].theta;
+		        mini = i; 
+		    }
+		}
+		ctx.lineTo(drawSpiral[mini].xpos,drawSpiral[mini].ypos);
+		ctx.stroke();	
+		//Now just return the Euclidean distance.
+    return(this.euclidDistance(drawSpiral[mini]));*/
+	}
 };
 
 function procUserSpiral() {
