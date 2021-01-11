@@ -228,7 +228,7 @@ function drawAnalysisPicture() {
 	var img=new Image();
 	if (flag) {
 		error = spiralError(2); 
-		chance = checkLearnedSpiral(spiralError(15,0)); 
+		chance = checkLearnedSpiral(spiralError(15,0,1)); 
 	}
 	img.onload=function() {
 		clearCanvas(); 

@@ -97,6 +97,7 @@ function spiralError(decs,printable=1,extended=0) {
 	//If extending, add newer metrics.
 	if (extended) {
 	  initResults=initResults.concat(calculate_accel(decs));
+	  initResults=initResults.concat(calculate_auc());
 	}
 	
 	return(initResults);			
@@ -229,14 +230,27 @@ function calculate_accel(decs) {
 }
 
 //New AUC function. 
-function calculate_auc() {
+function calculate_auc(trim=5) {
   //Calculate slope of line r vs. index
-  var slope = (userSpiral[userSpiral.length-1].r - userSpiral[0].r);
-  slope = slope / userSpiral.length;
-  
-  var auc = 0;
+  //First shift everything to the origin.
+  var data = [];
   for (var i=0; i<userSpiral.length; i++) {
-    auc += Math.abs(userSpiral[i].r - (userSpiral[0].r+slope));
+    data.push(parseFloat((userSpiral[i].r-userSpiral[0].r).toFixed(2)));
+  }
+  
+  //To find slope, us mean of first few and last few points. 
+  var start = data.slice(0,trim).reduce((a,b)=>a+b)/trim; 
+  var end = data.slice(data.length-trim,data.length).reduce((a,b)=>a+b)/trim; 
+  var slope = (start-end)/data.length; 
+  //var slope = (data[data.length-1] - data[0])/data.length;
+
+  //We don't know how far each point stretches on the x axis.
+  //Angles are unreliable.
+  //So just sum the mod. 
+  var auc = 0;
+  for (var i=1; i<data.length-trim; i++) {
+    //auc += Math.abs(data[i] - (data[0]+slope*i))/(data[0]+slope*i);
+    auc += data[i]%slope;
   }
   
   return(auc);
@@ -484,13 +498,13 @@ function euclidDistWeight(a,b,c) {
 function checkLearnedSpiral(arg,extended=0) {
   
   //Get rid of standard deviations basically. 
-  var forControl = [3,11];
-  var toKeep = [0,1,3,5,7,9,11,12,13,14,15,16,17];
-  var weightVector = [1,1,1,1,1,1,1,1,1,1,1,1,1,100000,100000];
+  var forControl = [3,5,7,9,11,12,13,14,15,16,17];
+  var toKeep = [3,5,7,9,11,12,13,14,15,16,17];
+  var weightVector = [1,1,1,1,1,1,1,1,1,1,1];
   if (extended==1) { toKeep=toKeep.concat([18,19]);console.log("extended"); }
   var ctrls=[]; var s=[]; var mindi=[]; var minInds = [];
   for (var bg=0; bg<learnedSpirals.length; bg++) {
-    ctrl=(euclidDist(forControl.map(k => arg[k]),forControl.map(k => learnedSpirals[bg][0][k]),weightVector));
+    ctrl=(euclidDistWeight(forControl.map(k => arg[k]),forControl.map(k => learnedSpirals[bg][0][k]),weightVector));
     ctrls.push(ctrl);
     s.push(ctrl);
   }
@@ -502,12 +516,12 @@ function checkLearnedSpiral(arg,extended=0) {
 
   var check=[]; var minds = []; var ds=[];  
   for (var bg=0; bg<minInds.length; bg++) {
-  ctrl=(euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][0][k]),weightVector));
+  ctrl=(euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][0][k]),weightVector));
   var mind=1000000; var d=0; var mi=-1; 
   //Distance to control center. 
   for (var i=1; i<learnedSpirals[minInds[bg]].length; i++) {
     //Distance to noise center. 
-    d=euclidDist(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][i][k]),weightVector);
+    d=euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[bg]][i][k]),weightVector);
     //Keep the minimum difference between control and noise. 
     ds.push(d);
     if (d<mind) { mind=d; mi=i;}
@@ -541,8 +555,9 @@ function analyzeSpiral() {
 	if (analyzed && analyzing) {
 	var print = "";
 	//printConsole(error);
-	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(10,0))]);
+	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(10,0,1))]);
 	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(10,0,1),1)]);
+	printConsole(['AUC = ',calculate_auc()]);
 	}
 	
 	flag=true;
