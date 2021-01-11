@@ -241,7 +241,7 @@ function calculate_auc(trim=5) {
   //To find slope, us mean of first few and last few points. 
   var start = data.slice(0,trim).reduce((a,b)=>a+b)/trim; 
   var end = data.slice(data.length-trim,data.length).reduce((a,b)=>a+b)/trim; 
-  var slope = (start-end)/data.length; 
+  var slope = (end-start)/data.length; 
   //var slope = (data[data.length-1] - data[0])/data.length;
 
   //We don't know how far each point stretches on the x axis.
@@ -250,7 +250,7 @@ function calculate_auc(trim=5) {
   var auc = 0;
   for (var i=1; i<data.length-trim; i++) {
     //auc += Math.abs(data[i] - (data[0]+slope*i))/(data[0]+slope*i);
-    auc += data[i]%slope;
+    auc += ((data[i]-start)%slope)/slope;
   }
   
   return(auc);
