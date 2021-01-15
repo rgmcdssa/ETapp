@@ -37,9 +37,17 @@ function spiralError(decs,printable=1,extended=0) {
 	toPolarCoordinates(userSpiral); 
 	if (drawSpiral.length>0) { toPolarCoordinates(drawSpiral); }
 
+  if (drawSpiral.length>0) {
+	  //If freehand spiral, find the right size of background and use that as a target. 
+	  if (drawBackgroundSpiral == 0) {
+      drawBackgroundSpiral = findSpiralSize(userSpiral); 
+      newBackgroundSpiral = 1;
+      drawBGSpiral(); 
+      console.log(drawBackgroundSpiral);
+	  }
+
 	//Calculate displacement from background ideal spiral, unless not using. 
 	//Do this using the linear graph of r vs. theta. 
-	if (drawSpiral.length>0 && drawBackgroundSpiral>0) {
 		RMSE=[];	
 		for (ji=0;ji<userSpiral.length;ji++) {
 			RMSE.push(Math.pow(userSpiral[ji].dispFromSpiral(),1));	
@@ -60,11 +68,10 @@ function spiralError(decs,printable=1,extended=0) {
 			ctx.lineTo(10+ji,10+RMSE[ji]);
 		}		
 		ctx.stroke();
-	}
-	else {
-		var mean=0; var std=0; 
-	}
-
+  }
+  else {
+    var mean=0; var std=0;
+  }
 	//Calculate frequency using dft from raw polar coordinates. 
 	rads = []; for (var i=0;i<userSpiral.length-1;i++) {
 		/*var aa = userSpiral[i].r - userSpiral[i+1].r; 
@@ -97,7 +104,7 @@ function spiralError(decs,printable=1,extended=0) {
 	//If extending, add newer metrics.
 	if (extended) {
 	  initResults=initResults.concat(calculate_accel(decs));
-	  initResults=initResults.concat(calculate_auc());
+	  if (drawBackgroundSpiral > 0) { initResults=initResults.concat(calculate_auc()); }
 	}
 	
 	return(initResults);			
@@ -250,7 +257,15 @@ function calculate_auc(trim=5) {
   var auc = 0;
   for (var i=1; i<data.length-trim; i++) {
     //auc += Math.abs(data[i] - (data[0]+slope*i))/(data[0]+slope*i);
-    auc += ((data[i]-start)%slope)/slope;
+    //auc += ((data[i]-start)%slope)/slope;
+    //Try just summing absolute difference between r of closest point by angle.
+    var mind = 0; var min=1000000; 
+    for (var j=0; j<drawSpiral.length; j++) {
+      if (min > Math.abs(drawSpiral[j].theta - userSpiral[i].theta)) {
+        min =  Math.abs(drawSpiral[j].theta - userSpiral[i].theta); mind=j; 
+      }
+    }
+    auc += Math.abs(drawSpiral[mind].r - data[i]);///Math.abs(drawSpiral[mind].r);
   }
   
   return(auc);
@@ -495,24 +510,43 @@ function euclidDistWeight(a,b,c) {
 }
 
 //Check spiral metrics vs. simulated noise. 
-function checkLearnedSpiral(arg,extended=0) {
+function checkLearnedSpiral(arg,extended=0,linear=0) {
   
-  //Get rid of standard deviations basically. 
-  var forControl = [3,5,7,9,11,12,13,14,15,16,17];
-  var toKeep = [3,5,7,9,11,12,13,14,15,16,17];
-  var weightVector = [1,1,1,1,1,1,1,1,1,1,1];
-  if (extended==1) { toKeep=toKeep.concat([18,19]);console.log("extended"); }
   var ctrls=[]; var s=[]; var mindi=[]; var minInds = [];
+  /*console.log(toKeep);
   for (var bg=0; bg<learnedSpirals.length; bg++) {
     ctrl=(euclidDistWeight(forControl.map(k => arg[k]),forControl.map(k => learnedSpirals[bg][0][k]),weightVector));
     ctrls.push(ctrl);
     s.push(ctrl);
+  }*/
+  for (var i=0; i<spiralBounds.length; i++) {
+    ctrls.push(Math.abs(spiralBounds[i]-boundArea(userSpiral)));
+    s.push(Math.abs(spiralBounds[i]-boundArea(userSpiral)));
   }
   s.sort(function(a, b){return a-b});
   var minInds = []; 
   for (var i=0; i<5; i++) {
     minInds.push(ctrls.indexOf(s[i]));
   }
+  
+    //If we're just checking the linear score, use distance from the background spiral of appropriate size as the only number. 
+  if (linear == 1 && drawBackgroundSpiral > 0) {
+    var toKeep = [4,5,10,11,19];
+    var weightVector=[1,1,1,1,1,1,1,1];
+    var res = []; 
+    for (var i=0; i<minInds.length; i++) { 
+      res.push((euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2))
+    }
+    return (res);
+  }
+  
+  //Get rid of standard deviations basically. 
+  var forControl = [3,5,7,9,11,12,13,14,15,16,17];
+  var toKeep = [3,5,7,9,11,12,13,14,15,16,17];
+  var weightVector = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+  
+  if (extended==1) { toKeep=toKeep.concat([18,19]);console.log("extended"); }
+
 
   var check=[]; var minds = []; var ds=[];  
   for (var bg=0; bg<minInds.length; bg++) {
@@ -529,12 +563,6 @@ function checkLearnedSpiral(arg,extended=0) {
   mindi.push(mi);
   minds.push((ctrl/mind).toFixed(2));
   }
-  /*var minds=[];
-  ctrl=(euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[0]][0][k]),weightVector));
-  for (var i=1; i<learnedSpirals[minInds[0]].length; i++) {
-    d=euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[0]][i][k]),weightVector);
-    minds.push((ctrl/d).toFixed(2));
-  }*/
   
   return(minds.sort(function(a, b){return a-b}));
 }
@@ -555,9 +583,9 @@ function analyzeSpiral() {
 	if (analyzed && analyzing) {
 	var print = "";
 	//printConsole(error);
-	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(10,0,1))]);
-	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(10,0,1),1)]);
-	printConsole(['AUC = ',calculate_auc()]);
+	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(12,0,1))]);
+	printConsole(['Chance spiral is abnormal = ',checkLearnedSpiral(spiralError(12,0,1),1)]);
+	if (drawBackgroundSpiral > 0) { printConsole(['AUC = ',calculate_auc()]); }
 	}
 	
 	flag=true;

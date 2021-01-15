@@ -77,21 +77,31 @@ class spiralPoint {
 		ctx.lineTo(drawSpiral[mini].xpos,drawSpiral[mini].ypos);
 		ctx.stroke();	
 		return(minDist);
-		/*//First find the closest point by angle to this userSpiral. 
-		var minAngle = 1000000; var mini = -1; 
-		for (var i=0; i<drawSpiral.length; i++) {
-		    if (drawSpiral[i].theta-this.theta < minAngle) {
-		        minAngle = drawSpiral[i].theta;
-		        mini = i; 
-		    }
-		}
-		ctx.lineTo(drawSpiral[mini].xpos,drawSpiral[mini].ypos);
-		ctx.stroke();	
-		//Now just return the Euclidean distance.
-    return(this.euclidDistance(drawSpiral[mini]));*/
 	}
 };
 
-function procUserSpiral() {
-	
+function boundArea(a) {
+  var minx = 0; var miny=0;
+  var maxx = 0; var maxy=0; 
+  
+  for (var i=0; i<a.length; i++) {
+    if (minx>a[i].xpos) { minx = a[i].xpos; }
+    else if (maxx<a[i].xpos) { maxx=a[i].xpos; }
+    if (miny>a[i].ypos) { miny = a[i].ypos; }
+    else if (maxy<a[i].ypos) { maxy=a[i].ypos; }
+  }
+  return((maxx-minx)*(maxy-miny));
+}
+
+//bounding boxes for spirals size 0.25 - 5 by 0.25
+
+var spiralBounds = [69257.55836362416, 71653.66979931448, 74090.52055009516, 76568.11061596617, 79086.43999692758, 81645.50869297933, 84245.31670412143, 86885.86403035389, 89567.1506716767, 92289.17662808992, 95051.94189959342, 97855.4464861873, 100699.69038787155, 103584.67360464617, 106510.39613651115, 109476.85798346644, 113366.63078034674, 117980.03176574102, 122674.98211910011]; 
+
+function findSpiralSize(arg) {
+  var size = boundArea(arg);
+  var min = size; var ind = 0; 
+  for (var i=0; i<spiralBounds.length; i++) {
+    if(min>spiralBounds[i]) { min=spiralBounds[i]; ind=i;}  
+  }
+  return(ind);
 }
