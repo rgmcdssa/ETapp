@@ -241,7 +241,7 @@ function drawAnalysisPicture() {
     if (chance[0] < 1 && chance[upper] < 1.1) { c="green"; }
     else if (chance[upper] < 1.1 && chance.reduce((a,b)=>parseFloat(a)+parseFloat(b))/(chance.length) < 1.1) { c="green"; } 
     else if ((chance[0]>1.1 || chance[1]>1.1)) { c="red"; }
-		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + chance[0] + "-" + chance[upper]; 
+		document.getElementById("chanceInfo").innerHTML = "Chance spiral is abnormal = " + (chance.reduce((a,b)=>parseFloat(a)+parseFloat(b))/chance.length).toFixed(2); 
 		if (c != "green" && drawBackgroundSpiral > 0) { document.getElementById("chanceInfo").innerHTML += " (" + (chance2.reduce((a,b)=>parseFloat(a)+parseFloat(b))/chance2.length).toFixed(2) + ")"; }
 		document.getElementById("chanceInfo").style.color = c;
 
