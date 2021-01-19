@@ -554,7 +554,7 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
   
     //If we're just checking the linear score, use distance from the background spiral of appropriate size as the only number. 
   if (linear == 1 && (drawBackgroundSpiral > 0 || plotType == 1)) {
-    var toKeep = [4,5,10,11,19];
+    var toKeep = [4,5,10,11,19,20];
     var weightVector=[1,1,1,1,1,1,1,1];
     var res = []; 
     //Only use the template size. 
