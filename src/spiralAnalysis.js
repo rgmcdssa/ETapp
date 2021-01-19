@@ -544,7 +544,12 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
   //If drawing against a template, always start with that size. 
   if (drawBackgroundSpiral>0) { minInds.push(drawBackgroundSpiral/0.25); }
   for (var i=0; i<5; i++) {
-    minInds.push(ctrls.indexOf(s[i]));
+    if (drawBackgroundSpiral>0) { if (ctrls.indexOf(s[i]) != drawBackgroundSpiral/0.25) {
+      minInds.push(ctrls.indexOf(s[i]));
+    }}
+    else { 
+      minInds.push(ctrls.indexOf(s[i]));
+    }
   }
   
     //If we're just checking the linear score, use distance from the background spiral of appropriate size as the only number. 
