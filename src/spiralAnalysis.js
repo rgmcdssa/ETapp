@@ -554,9 +554,11 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
     var res = []; 
     //Only use the template size. 
     for (var i=0; i<(drawBackgroundSpiral>0?1:minInds.length); i++) { 
-      var p1=((euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => perfSpirals[drawBackgroundSpiral][k]),weightVector)).toFixed(2));
-      var p2=(euclidDistWeight(toKeep.map(k=> perfSpirals[drawBackgroundSpiral][k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2);
-      res.push(p1);
+      var p1=((euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => perfSpirals[minInds[i]][k]),weightVector)).toFixed(2));
+      var p2=(euclidDistWeight(toKeep.map(k=> perfSpirals[minInds[i]][k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2);
+      var p3=(euclidDistWeight(toKeep.map(k=> arg[k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2);
+      console.log(p1+" "+p2+" "+p3); 
+      res.push(p1/p2);
     }
     return (res);
   }
