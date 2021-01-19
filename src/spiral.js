@@ -116,6 +116,7 @@ window.addEventListener('resize',resizeCanvas, false);
 
 openDB();
 makeLearnedSpirals(); 
+setUpPerfSpirals(); 
 	
 vid=document.getElementById("videoHolder");
 }

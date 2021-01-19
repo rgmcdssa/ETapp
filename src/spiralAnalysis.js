@@ -509,6 +509,22 @@ function euclidDistWeight(a,b,c) {
   return(Math.sqrt(diff.reduce((acc,v) => acc + v)));
 }
 
+function getModelCentroid(ind) {
+  var res=[];
+  for (var i=0; i<learnedSpirals[0][ind].length; i++) {
+    res.push(0);
+  }
+  for (var i=0; i<learnedSpirals.length; i++) {
+    for (var j=0; j<learnedSpirals[i][ind].length; j++) {
+      res[j] += parseFloat(learnedSpirals[i][ind][j]);
+    }
+  }
+  for (var i=0; i<res.length; i++) {
+    res[i] = res[i]/learnedSpirals.length;
+  }
+  return(res);
+}
+
 //Check spiral metrics vs. simulated noise. 
 function checkLearnedSpiral(arg,extended=0,linear=0) {
   
@@ -525,6 +541,8 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
   }
   s.sort(function(a, b){return a-b});
   var minInds = []; 
+  //If drawing against a template, always start with that size. 
+  if (drawBackgroundSpiral>0) { minInds.push(drawBackgroundSpiral/0.25); }
   for (var i=0; i<5; i++) {
     minInds.push(ctrls.indexOf(s[i]));
   }
@@ -534,8 +552,11 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
     var toKeep = [4,5,10,11,19];
     var weightVector=[1,1,1,1,1,1,1,1];
     var res = []; 
-    for (var i=0; i<minInds.length; i++) { 
-      res.push((euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2))
+    //Only use the template size. 
+    for (var i=0; i<(drawBackgroundSpiral>0?1:minInds.length); i++) { 
+      var p1=((euclidDistWeight(toKeep.map(k => arg[k]),toKeep.map(k => perfSpirals[drawBackgroundSpiral][k]),weightVector)).toFixed(2));
+      var p2=(euclidDistWeight(toKeep.map(k=> perfSpirals[drawBackgroundSpiral][k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2);
+      res.push(p1);
     }
     return (res);
   }
