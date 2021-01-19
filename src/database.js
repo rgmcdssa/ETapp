@@ -98,7 +98,7 @@ function calculateSelfDistances(a) {
         }    
         //Use best spiral as center instead. 
         dists.push(tmp);
-        if (arrayMean(checkLearnedSpiral(a[i].text,0,plotType)) < minc) { minc = arrayMean(checkLearnedSpiral(a[i].text)); center = i; }
+        if (arrayMean(checkLearnedSpiral(a[i].text,0,plotType)) < minc) { minc = arrayMean(checkLearnedSpiral(a[i].text,0,plotType)); center = i; }
       }
     }
     //for (i=0; i<toKeep.length;i++) { dists[center][i] = dists[center][i]/a.length; }
