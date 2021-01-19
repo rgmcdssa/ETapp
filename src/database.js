@@ -63,6 +63,9 @@ function procDate(a) {
 }
 
 function arrayMean(arg) { 
+  if (plotType ==1) {
+    return(arg[0]);
+  }
   var mean=0; 
   for (var i=0; i<arg.length; i++) {
     mean += parseFloat(arg[i]);
@@ -71,6 +74,9 @@ function arrayMean(arg) {
 }
 
 function firstLast(arg) {
+  if (plotType ==1) {
+    return(arg[0]);
+  }
   return(arg[0]+"-"+arg[arg.length-1]);
 }
 
@@ -111,7 +117,7 @@ function calculateSelfDistances(a) {
     var c=0; 
     for (i=0; i<a.length; i++) {
       if (i == center) {
-        out.push(0);
+        out.push(1.0);
       }
       else if (a[i].patient == pt || pt == "") {
         if (sd == 0) { out.push(0); }
@@ -133,7 +139,7 @@ var plotType = 0;
 function plotResults(a,targetTest) {
 	resultStore = a;
 	document.getElementById("plotArea").innerHTML = "";
-	var toggleDiv = document.createElement('a');
+	var toggleDiv = document.createElement('p');
 	toggleDiv.setAttribute('onclick',"plotType=(plotType==0?1:0);getResults('spiral');");
 	toggleDiv.textContent = "Toggle spiral value type";
   document.getElementById('plotArea').appendChild(toggleDiv);
