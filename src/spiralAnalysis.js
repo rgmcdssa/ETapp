@@ -553,7 +553,7 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
   }
   
     //If we're just checking the linear score, use distance from the background spiral of appropriate size as the only number. 
-  if (linear == 1 && drawBackgroundSpiral > 0) {
+  if (linear == 1 && (drawBackgroundSpiral > 0 || plotType == 1)) {
     var toKeep = [4,5,10,11,19];
     var weightVector=[1,1,1,1,1,1,1,1];
     var res = []; 
@@ -563,7 +563,7 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
       var p2=(euclidDistWeight(toKeep.map(k=> perfSpirals[minInds[i]][k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2);
       var p3=(euclidDistWeight(toKeep.map(k=> arg[k]),toKeep.map(k => learnedSpirals[minInds[i]][0][k]),weightVector)).toFixed(2);
       console.log(p1+" "+p2+" "+p3); 
-      res.push(p1/p2);
+      res.push((p1/p2).toFixed(2));
     }
     return (res);
   }

@@ -19,7 +19,7 @@ function saveResults(targetTest) {
 	let tx=db.transaction(['storage'],'readwrite');
 	let store = tx.objectStore('storage');
 	
-	var result =spiralError(5,0); 
+	var result =spiralError(5,0,1); 
 	//result = result.substring(7);
 	var patientInfo = document.getElementById('userInfo').value;
 	
@@ -92,7 +92,7 @@ function calculateSelfDistances(a) {
         }    
         //Use best spiral as center instead. 
         dists.push(tmp);
-        if (arrayMean(checkLearnedSpiral(a[i].text)) < minc) { minc = arrayMean(checkLearnedSpiral(a[i].text)); center = i; }
+        if (arrayMean(checkLearnedSpiral(a[i].text,0,plotType)) < minc) { minc = arrayMean(checkLearnedSpiral(a[i].text)); center = i; }
       }
     }
     //for (i=0; i<toKeep.length;i++) { dists[center][i] = dists[center][i]/a.length; }
@@ -101,7 +101,7 @@ function calculateSelfDistances(a) {
     for (i=0; i<dists.length; i++) {
         //if (i!=center) { m.push(euclidDist(dists[i],dists[center]).toFixed(2)); }
         //Use mean of ratios instead of actual calculated distances.
-        if (i!=center) { m.push((arrayMean(checkLearnedSpiral(a[i].text))/arrayMean(checkLearnedSpiral(a[center].text))).toFixed(2)); }
+        if (i!=center) { m.push((arrayMean(checkLearnedSpiral(a[i].text,0,plotType))/arrayMean(checkLearnedSpiral(a[center].text,0,plotType))).toFixed(2)); }
         mean += parseFloat(m[m.length-1]);
     }  
     mean /= m.length; 
@@ -126,14 +126,17 @@ function calculateSelfDistances(a) {
     //  out[i]=(out[i]/m).toFixed(2); 
     //}
     
-    
-    
     return(out);
 }
 
+var plotType = 0; 
 function plotResults(a,targetTest) {
 	resultStore = a;
 	document.getElementById("plotArea").innerHTML = "";
+	var toggleDiv = document.createElement('a');
+	toggleDiv.setAttribute('onclick',"plotType=(plotType==0?1:0);getResults('spiral');");
+	toggleDiv.textContent = "Toggle spiral value type";
+  document.getElementById('plotArea').appendChild(toggleDiv);
   
   var selfs = calculateSelfDistances(resultStore); 
 
@@ -179,8 +182,8 @@ function plotResults(a,targetTest) {
 		
 		c3.appendChild(document.createTextNode(resultStore[i].hand));
 		row.appendChild(c3);
-		
-		c4.appendChild(document.createTextNode(firstLast(checkLearnedSpiral(resultStore[i].text))));
+
+		c4.appendChild(document.createTextNode(firstLast(checkLearnedSpiral(resultStore[i].text,0,plotType))));
 		row.appendChild(c4);
 		
 		c5.appendChild(document.createTextNode(selfs[i]));
