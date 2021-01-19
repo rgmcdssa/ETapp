@@ -73,11 +73,11 @@ function arrayMean(arg) {
   return((mean/arg.length).toFixed(2));
 }
 
-function firstLast(arg) {
+function firstLast(arg,trim=3) {
   if (plotType ==1) {
     return(arg[0]);
   }
-  return(arg[0]+"-"+arg[arg.length-1]);
+  return(arg[0]+"-"+arg[trim]);
 }
 
 //Find the center of the error cluster and then calculate how far each point is from it.
