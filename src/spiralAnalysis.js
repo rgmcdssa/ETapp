@@ -105,6 +105,7 @@ function spiralError(decs,printable=1,extended=0) {
 	if (extended) {
 	  initResults=initResults.concat(calculate_accel(decs));
 	  if (drawBackgroundSpiral > 0) { initResults=initResults.concat(calculate_auc()); }
+	  else { initResults=initResults.concat(0); }
 	}
 	
 	return(initResults);			
@@ -551,7 +552,7 @@ function checkLearnedSpiral(arg,extended=0,linear=0) {
       minInds.push(ctrls.indexOf(s[i]));
     }
   }
-  
+  console.log(minInds);
     //If we're just checking the linear score, use distance from the background spiral of appropriate size as the only number. 
   if (linear == 1 && (drawBackgroundSpiral > 0 || plotType == 1)) {
     var toKeep = [4,5,10,11,19,20];

@@ -94,7 +94,6 @@ function calculateSelfDistances(a) {
         var tmp=[];
         for (var j=0; j<toKeep.length; j++) {
             tmp.push(parseFloat(a[i].text[toKeep[j]])); 
-        //   center[j] = center[j] + tmp[tmp.length-1];
         }    
         //Use best spiral as center instead. 
         dists.push(tmp);
@@ -189,6 +188,7 @@ function plotResults(a,targetTest) {
 		c3.appendChild(document.createTextNode(resultStore[i].hand));
 		row.appendChild(c3);
 
+    console.log(resultStore[i].text);
 		c4.appendChild(document.createTextNode(firstLast(checkLearnedSpiral(resultStore[i].text,0,plotType))));
 		row.appendChild(c4);
 		
