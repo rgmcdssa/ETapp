@@ -83,53 +83,45 @@ function firstLast(arg,trim=3) {
 //Find the center of the error cluster and then calculate how far each point is from it.
 //Not the most elegant solution, but necessary without vector operations. 
 function calculateSelfDistances(a) {
-    var toKeep = [3,5,7,11,12,13,14,15,16,17];
-    var dists = [];
+
     var out = [];
     var center = 0; var minc=1000000; 
+    var inds = [];
     var pt = document.getElementById("userInfo").value; 
     //for (var i=0; i<toKeep.length;i++) { center.push(0); }
     for (i=0; i<a.length; i++) {
       if (a[i].patient == pt || pt == "") {
-        var tmp=[];
-        for (var j=0; j<toKeep.length; j++) {
-            tmp.push(parseFloat(a[i].text[toKeep[j]])); 
-        }    
-        //Use best spiral as center instead. 
-        dists.push(tmp);
-        if (arrayMean(checkLearnedSpiral(a[i].text,0,plotType)) < minc) { minc = arrayMean(checkLearnedSpiral(a[i].text,0,plotType)); center = i; }
+        inds.push(i);
+        if (parseFloat(arrayMean(checkLearnedSpiral(a[i].text,0,plotType))) < minc) { 
+          minc = parseFloat(arrayMean(checkLearnedSpiral(a[i].text,0,plotType))); center = i; 
+        }
       }
     }
-    //for (i=0; i<toKeep.length;i++) { dists[center][i] = dists[center][i]/a.length; }
+
     //Calculate mean, sd so we can do z scores. 
     var m = []; var mean = 0; var sd = 0;
-    for (i=0; i<dists.length; i++) {
+    for (i=0; i<inds.length; i++) {
         //if (i!=center) { m.push(euclidDist(dists[i],dists[center]).toFixed(2)); }
         //Use mean of ratios instead of actual calculated distances.
-        if (i!=center) { m.push((arrayMean(checkLearnedSpiral(a[i].text,0,plotType))/arrayMean(checkLearnedSpiral(a[center].text,0,plotType))).toFixed(2)); }
+        if (inds[i]!=center) { m.push((arrayMean(checkLearnedSpiral(a[inds[i]].text,0,plotType))/arrayMean(checkLearnedSpiral(a[center].text,0,plotType))).toFixed(2)); }
         mean += parseFloat(m[m.length-1]);
     }  
     mean /= m.length; 
-    for (i=0; i<dists.length; i++) { sd = (m[i]-mean)^2; }
+    for (i=0; i<inds.length; i++) { sd = (m[i]-mean)^2; }
     sd = Math.sqrt(sd / m.length);
    
     var c=0; 
-    for (i=0; i<a.length; i++) {
-      if (i == center) {
+    for (i=0; i<inds.length; i++) {
+      if (inds[i] == center) {
         out.push(1.0);
       }
-      else if (a[i].patient == pt || pt == "") {
+      else if (a[inds[i]].patient == pt || pt == "") {
         if (sd == 0) { out.push(0); }
-        //out.push((m[c++]-mean/sd).toFixed(2));}
         out.push(m[c++]); }
       else {
         out.push(1000000);
       }
     }
-    //var m = Math.min(...out); 
-    //for (i=0; i<a.length; i++) {
-    //  out[i]=(out[i]/m).toFixed(2); 
-    //}
     
     return(out);
 }
@@ -188,7 +180,6 @@ function plotResults(a,targetTest) {
 		c3.appendChild(document.createTextNode(resultStore[i].hand));
 		row.appendChild(c3);
 
-    console.log(resultStore[i].text);
 		c4.appendChild(document.createTextNode(firstLast(checkLearnedSpiral(resultStore[i].text,0,plotType))));
 		row.appendChild(c4);
 		
